@@ -1,4 +1,8 @@
-#include "foundation/hash.h"
+#include "foundation.h"
+
+#include "crt.h"
+
+#include "hash.h"
 
 #define XXH_STATIC_LINKING_ONLY
 #define XXH_IMPLEMENTATION

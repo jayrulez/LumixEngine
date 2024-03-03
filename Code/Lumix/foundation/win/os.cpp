@@ -1,12 +1,12 @@
-#include "foundation/allocator.h"
-#include "foundation/allocators.h"
-#include "foundation/atomic.h"
-#include "foundation/log.h"
-#include "foundation/foundation.h"
-#include "foundation/os.h"
-#include "foundation/path.h"
-#include "foundation/profiler.h"
-#include "foundation/string.h"
+#include "allocator.h"
+#include "allocators.h"
+#include "atomic.h"
+#include "log.h"
+#include "foundation.h"
+#include "os.h"
+#include "path.h"
+#include "profiler.h"
+#include "string.h"
 #define UNICODE
 #pragma warning(push)
 #pragma warning(disable : 4091)

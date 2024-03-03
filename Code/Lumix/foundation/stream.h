@@ -1,7 +1,8 @@
 #pragma once
 
-#include "array.h"
 #include "foundation.h"
+#include "span.h"
+#include "array.h"
 
 namespace Lumix {
 

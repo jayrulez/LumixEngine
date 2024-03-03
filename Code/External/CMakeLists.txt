@@ -8,7 +8,7 @@ if(NOT ${WELDER_PLATFORM} STREQUAL "Windows")
 endif()
 
 # Cross platform source libraries.
-add_subdirectory(Assimp)
+#add_subdirectory(Assimp)
 add_subdirectory(FreeType)
 add_subdirectory(Glew)
 add_subdirectory(Libgit2)

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "foundation/foundation.h"
+#include "span.h"
 #include "foundation/allocator.h"
 #include "foundation/crt.h"
 

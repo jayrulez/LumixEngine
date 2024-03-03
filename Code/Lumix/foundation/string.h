@@ -1,6 +1,7 @@
 #pragma once
 
 #include "foundation/foundation.h"
+#include "foundation/span.h"
 #include "foundation/hash.h"
 
 // all functions here handle bytes independently of the encoding used

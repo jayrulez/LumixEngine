@@ -1,3 +1,10 @@
+#undef UNICODE
+
+
+//errno_t strcat_s(char* dest, rsize_t destsz, const char* src) {
+//	return 0;
+//}
+
 #define NOGDI
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -7,10 +14,13 @@
 #pragma warning (pop)
 #include <mapi.h>
 
+#include "foundation.h"
+#include "foundation/allocator.h"
 #include "foundation/allocators.h"
 #include "foundation/crt.h"
 #include "foundation/debug.h"
 #include "foundation/log.h"
+#include "foundation/sync.h"
 #include "foundation/atomic.h"
 #include "foundation/os.h"
 #include "foundation/path.h"

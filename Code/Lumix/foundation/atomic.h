@@ -1,6 +1,6 @@
 #pragma once
 
-#include "foundation/foundation.h"
+#include "foundation.h"
 
 namespace Lumix
 {

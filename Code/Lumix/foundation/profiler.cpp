@@ -19,6 +19,8 @@
 #include "foundation/os.h"
 #include "profiler.h"
 
+#include <string.h>
+
 namespace Lumix
 {
 
