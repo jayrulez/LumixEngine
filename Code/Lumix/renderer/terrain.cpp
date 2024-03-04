@@ -3,7 +3,7 @@
 #include "engine/engine.h"
 #include "foundation/geometry.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/profiler.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"

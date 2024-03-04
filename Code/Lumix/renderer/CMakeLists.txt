@@ -87,7 +87,7 @@ endif()
 
 target_sources(renderer
   PRIVATE
-#    ${renderer_src}
+    ${renderer_src}
     ${CMAKE_CURRENT_LIST_DIR}/RendererStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/RendererStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
@@ -99,6 +99,13 @@ target_link_libraries(renderer
   PUBLIC
     Common
     Zilch
+    FreeType
     foundation
 	  engine
+    lua_script
+)
+
+target_include_directories(renderer
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external
 )

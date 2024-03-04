@@ -4,13 +4,13 @@
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
 #include "foundation/sync.h"
 #include "foundation/os.h"
 #include "foundation/profiler.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 namespace Lumix {
 

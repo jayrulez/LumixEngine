@@ -4,7 +4,7 @@
 
 #include "editor/entity_folders.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 
 #include "engine/world.h"
 

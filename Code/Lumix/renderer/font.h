@@ -3,7 +3,7 @@
 
 #include "foundation/allocators.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "engine/resource.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"

@@ -4,7 +4,7 @@
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
 #include "engine/resource.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "gpu/gpu.h"
 
 

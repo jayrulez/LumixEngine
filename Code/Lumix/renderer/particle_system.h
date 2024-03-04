@@ -4,7 +4,7 @@
 
 #include "foundation/array.h"
 #include "foundation/atomic.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
 
 #include "engine/resource.h"

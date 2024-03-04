@@ -4,7 +4,7 @@
 #include "foundation/delegate.h"
 #include "foundation/hash.h"
 #include "engine/resource.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "renderer/gpu/gpu.h"
 
 

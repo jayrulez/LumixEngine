@@ -5,7 +5,7 @@
 #include "foundation/file_system.h"
 #include "foundation/hash.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"
 #include "foundation/stream.h"

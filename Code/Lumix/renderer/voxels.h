@@ -2,7 +2,7 @@
 
 #include "foundation/array.h"
 #include "foundation/geometry.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
 
 namespace Lumix {

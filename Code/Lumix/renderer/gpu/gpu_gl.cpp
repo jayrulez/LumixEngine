@@ -4,14 +4,14 @@
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/page_allocator.h"
 #include "foundation/stream.h"
 #include "foundation/sync.h"
 #include "foundation/os.h"
 #include "foundation/profiler.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #ifdef _WIN32
 	#define WIN32_LEAN_AND_MEAN
 	#include <Windows.h>

@@ -7,9 +7,9 @@
 #include "foundation/geometry.h"
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "engine/resource.h"
 #include "gpu/gpu.h"

@@ -7,7 +7,7 @@
 #include "foundation/allocator.h"
 #include "foundation/atomic.h"
 #include "foundation/job_system.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/page_allocator.h"
 #include "foundation/profiler.h"
 #include "foundation/simd.h"

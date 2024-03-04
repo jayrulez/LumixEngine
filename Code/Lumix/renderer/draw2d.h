@@ -1,7 +1,7 @@
 #pragma once
 
 #include "foundation/array.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "renderer/gpu/gpu.h"
 
 

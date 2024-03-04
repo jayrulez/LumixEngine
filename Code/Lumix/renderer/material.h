@@ -5,7 +5,7 @@
 #include "foundation/hash.h"
 #include "engine/resource.h"
 #include "engine/resource_manager.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "gpu/gpu.h"
 
 

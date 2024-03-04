@@ -1,9 +1,9 @@
 #include "draw_stream.h"
 #include "foundation/array.h"
 #include "engine/engine.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/page_allocator.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "renderer/renderer.h"
 #ifdef _WIN32
 	#include <intrin.h>

@@ -4,7 +4,7 @@
 #include "engine/core.h"
 #include "foundation/job_system.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/metaprogramming.h"
 #include "foundation/page_allocator.h"
 #include "foundation/profiler.h"

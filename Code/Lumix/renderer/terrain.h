@@ -3,7 +3,7 @@
 
 #include "foundation/array.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/geometry.h"
 #include "engine/resource.h"
 #include "foundation/stream.h"
