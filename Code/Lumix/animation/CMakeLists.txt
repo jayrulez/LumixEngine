@@ -31,7 +31,7 @@ endif()
 
 target_sources(animation
   PRIVATE
-#    ${animation_src}
+    ${animation_src}
     ${CMAKE_CURRENT_LIST_DIR}/AnimationStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/AnimationStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
@@ -45,4 +45,5 @@ target_link_libraries(animation
     Zilch
     foundation
     engine
+    renderer
 )
