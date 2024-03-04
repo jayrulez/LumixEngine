@@ -1,5 +1,5 @@
 #include "crt.h"
-#include "math.h"
+#include "lmath.h"
 #include "os.h"
 #include "simd.h"
 

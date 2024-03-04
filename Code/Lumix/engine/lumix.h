@@ -3,7 +3,7 @@
 #include "foundation/foundation.h"
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 namespace Lumix {
 

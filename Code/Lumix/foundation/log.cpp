@@ -4,7 +4,7 @@
 #include "foundation/log.h"
 #include "foundation/path.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/sync.h"
 
 

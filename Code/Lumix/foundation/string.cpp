@@ -1,4 +1,4 @@
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/allocator.h"
 #include "foundation/crt.h"
 

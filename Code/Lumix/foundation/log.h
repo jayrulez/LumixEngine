@@ -2,7 +2,7 @@
 
 #include "foundation/foundation.h"
 #include "foundation/delegate_list.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 namespace Lumix {
 

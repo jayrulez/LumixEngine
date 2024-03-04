@@ -12,14 +12,12 @@
 #include "foundation/hash_map.h"
 #include "foundation/allocators.h"
 #include "foundation/atomic.h"
-#include "foundation/math.h"
-#include "foundation/string.h"
+#include "foundation/lmath.h"
+#include "foundation/lstring.h"
 #include "foundation/sync.h"
 #include "foundation/thread.h"
 #include "foundation/os.h"
 #include "profiler.h"
-
-#include <string.h>
 
 namespace Lumix
 {

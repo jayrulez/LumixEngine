@@ -187,8 +187,8 @@ set(Common_Platform_Sources
     ${CMAKE_CURRENT_LIST_DIR}/Platform/UnicodeUtility.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Platform/Utilities.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Platform/Utilities.hpp
-    ${CMAKE_CURRENT_LIST_DIR}/Platform/WebRequest.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/Platform/WebRequest.hpp
+#    ${CMAKE_CURRENT_LIST_DIR}/Platform/WebRequest.cpp
+#    ${CMAKE_CURRENT_LIST_DIR}/Platform/WebRequest.hpp
 )
 
 set(Common_Regex_Sources

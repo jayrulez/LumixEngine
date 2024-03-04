@@ -1,7 +1,7 @@
 #include "foundation/allocators.h"
 #include "foundation/atomic.h"
 #include "foundation/crt.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #if !defined __linux__ && defined __clang__
 	#include <intrin.h>

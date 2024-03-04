@@ -1,6 +1,6 @@
 #include "geometry.h"
 #include "foundation/crt.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/simd.h"
 
 

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "foundation/foundation.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 
 namespace Lumix {
 

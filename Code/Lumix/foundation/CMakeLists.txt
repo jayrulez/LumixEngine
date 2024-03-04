@@ -30,7 +30,7 @@ set(foundation_src
     ${CMAKE_CURRENT_LIST_DIR}/log.cpp
     ${CMAKE_CURRENT_LIST_DIR}/log.h
     ${CMAKE_CURRENT_LIST_DIR}/math.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/math.h
+    ${CMAKE_CURRENT_LIST_DIR}/lmath.h
     ${CMAKE_CURRENT_LIST_DIR}/metaprogramming.h
     ${CMAKE_CURRENT_LIST_DIR}/os.h
     ${CMAKE_CURRENT_LIST_DIR}/page_allocator.cpp
@@ -47,7 +47,7 @@ set(foundation_src
     ${CMAKE_CURRENT_LIST_DIR}/stream.cpp
     ${CMAKE_CURRENT_LIST_DIR}/stream.h
     ${CMAKE_CURRENT_LIST_DIR}/string.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/string.h
+    ${CMAKE_CURRENT_LIST_DIR}/lstring.h
     ${CMAKE_CURRENT_LIST_DIR}/sync.h
     ${CMAKE_CURRENT_LIST_DIR}/thread.h
 )

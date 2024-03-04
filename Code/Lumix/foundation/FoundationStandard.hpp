@@ -1,10 +1,10 @@
 #pragma once
 
-//#include "Common/CommonStandard.hpp"
-#//include "Platform/PlatformStandard.hpp"
-//#include "Serialization/SerializationStandard.hpp"
-//#include "Meta/MetaStandard.hpp"
-//#include "Support/SupportStandard.hpp"
+#include "Common/CommonStandard.hpp"
+#include "Platform/PlatformStandard.hpp"
+#include "Serialization/SerializationStandard.hpp"
+#include "Meta/MetaStandard.hpp"
+#include "Support/SupportStandard.hpp"
 
 namespace Zero
 {
@@ -24,7 +24,7 @@ namespace Zero
 #include "allocators.h"
 #include "array.h"
 #include "associative_array.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "command_line_parser.h"
 #include "delegate.h"
 #include "delegate_list.h"

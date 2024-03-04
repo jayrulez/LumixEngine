@@ -1,10 +1,3 @@
-#undef UNICODE
-
-
-//errno_t strcat_s(char* dest, rsize_t destsz, const char* src) {
-//	return 0;
-//}
-
 #define NOGDI
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
@@ -24,8 +17,7 @@
 #include "foundation/atomic.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
-#include "foundation/string.h"
-
+#include "foundation/lstring.h"
 
 #pragma comment(lib, "DbgHelp.lib")
 

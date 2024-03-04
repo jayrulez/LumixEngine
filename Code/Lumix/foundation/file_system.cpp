@@ -12,7 +12,7 @@
 #include "foundation/path.h"
 #include "foundation/profiler.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 namespace Lumix {
 

@@ -3,7 +3,7 @@
 #include "foundation/sync.h"
 #include "foundation/atomic.h"
 #include "foundation/profiler.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/win/simple_win.h"
 #include <intrin.h>
 

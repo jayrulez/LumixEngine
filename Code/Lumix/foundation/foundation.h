@@ -1,8 +1,6 @@
 #pragma once
 #ifndef _WIN32
 	#include <signal.h> // SIGTRAP
-
-#undef UNICODE
 #endif
 
 #if !defined(_WIN32) && !defined(__linux__)

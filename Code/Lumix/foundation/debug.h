@@ -1,9 +1,10 @@
 #pragma once
 
 
+#include "foundation/foundation.h"
+#include "foundation/span.h"
 #include "foundation/allocator.h"
 #include "foundation/atomic.h"
-#include "foundation/foundation.h"
 #include "foundation/sync.h"
 
 

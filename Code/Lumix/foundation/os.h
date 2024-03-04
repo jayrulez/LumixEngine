@@ -3,7 +3,7 @@
 
 #include "foundation.h"
 #include "stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #ifdef __linux__
 	#include <pthread.h>
 #endif

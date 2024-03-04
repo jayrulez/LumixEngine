@@ -1,7 +1,7 @@
 #pragma once
 
 #include "foundation/hash.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 
 namespace Lumix {

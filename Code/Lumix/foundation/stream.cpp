@@ -1,9 +1,9 @@
 #include "stream.h"
 #include "foundation/allocator.h"
 #include "foundation/crt.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/page_allocator.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 
 namespace Lumix {

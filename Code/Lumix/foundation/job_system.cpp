@@ -4,7 +4,7 @@
 #include "foundation/fibers.h"
 #include "foundation/allocator.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/ring_buffer.h"
 #include "foundation/sync.h"
