@@ -4,7 +4,7 @@
 #include "foundation/allocator.h"
 #include "foundation/crt.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/profiler.h"
 
 #include "audio_device.h"

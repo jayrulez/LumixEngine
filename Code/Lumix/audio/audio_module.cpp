@@ -2,7 +2,7 @@
 #include "foundation/associative_array.h"
 #include "foundation/hash.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
 
 #include "audio_module.h"

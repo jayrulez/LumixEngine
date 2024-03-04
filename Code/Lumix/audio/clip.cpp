@@ -3,7 +3,7 @@
 #include "foundation/allocator.h"
 #include "foundation/crt.h"
 #include "foundation/profiler.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/stream.h"
 
 #include "clip.h"

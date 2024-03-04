@@ -33,7 +33,7 @@ endif()
 
 target_sources(audio
   PRIVATE
-#    ${audio_src}
+    ${audio_src}
     ${CMAKE_CURRENT_LIST_DIR}/AudioStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/AudioStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
@@ -46,4 +46,5 @@ target_link_libraries(audio
     Zilch
     foundation
 	  engine
+    dxguid
 )
