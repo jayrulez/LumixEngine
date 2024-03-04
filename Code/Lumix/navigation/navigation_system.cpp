@@ -1,6 +1,6 @@
 #include "engine/lumix.h"
 
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/profiler.h"
 
 #include "navigation_module.h"

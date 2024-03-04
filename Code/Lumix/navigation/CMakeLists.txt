@@ -15,9 +15,15 @@ if(BUILD_EDITOR)
   )
 endif()
 
+target_link_directories(navigation
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/recast/lib/win64_vs2017/release
+)
+
+
 target_sources(navigation
   PRIVATE
-#    ${navigation_src}
+    ${navigation_src}
     ${CMAKE_CURRENT_LIST_DIR}/NavigationStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/NavigationStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
@@ -31,4 +37,11 @@ target_link_libraries(navigation
     Zilch
     foundation
 	  engine
+    renderer
+    recast
+)
+
+target_include_directories(navigation
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/recast/include
 )
