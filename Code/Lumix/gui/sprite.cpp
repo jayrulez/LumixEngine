@@ -3,7 +3,7 @@
 #include "engine/lua_wrapper.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "renderer/texture.h"
 
 

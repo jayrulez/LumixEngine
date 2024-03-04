@@ -2,7 +2,7 @@
 #include "engine/engine.h"
 #include "foundation/allocator.h"
 #include "engine/input_system.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"
 #include "engine/reflection.h"

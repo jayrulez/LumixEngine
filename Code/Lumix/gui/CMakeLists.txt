@@ -20,7 +20,7 @@ endif()
 
 target_sources(gui
   PRIVATE
-#    ${gui_src}
+    ${gui_src}
     ${CMAKE_CURRENT_LIST_DIR}/GuiStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/GuiStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
@@ -33,5 +33,6 @@ target_link_libraries(gui
     Common
     Zilch
     foundation
-	engine
+	  engine
+    renderer
 )

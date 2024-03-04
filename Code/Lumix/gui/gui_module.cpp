@@ -7,7 +7,7 @@
 #include "foundation/os.h"
 #include "engine/reflection.h"
 #include "engine/resource_manager.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include "gui_module.h"
 #include "gui_system.h"
