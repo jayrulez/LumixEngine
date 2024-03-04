@@ -17,7 +17,7 @@
 #include "engine/lua_wrapper.h"
 #include "foundation/profiler.h"
 #include "engine/resource_manager.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include "physics/physics_resources.h"
 #include "physics/physics_module.h"

@@ -3,7 +3,7 @@
 #include "engine/lumix.h"
 
 #include "foundation/allocator.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 
 #include "engine/plugin.h"
 

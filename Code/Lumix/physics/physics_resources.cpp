@@ -10,8 +10,8 @@
 #include "foundation/profiler.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
-#include "foundation/math.h"
+#include "foundation/lstring.h"
+#include "foundation/lmath.h"
 #include "physics/physics_system.h"
 
 
