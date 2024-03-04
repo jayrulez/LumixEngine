@@ -2,11 +2,12 @@
 #include "engine/engine.h"
 #include "foundation/hash.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "engine/plugin.h"
 #include "engine/prefab.h"
 #include "engine/reflection.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
+#include "foundation/span.h"
 
 
 namespace Lumix

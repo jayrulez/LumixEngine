@@ -2,7 +2,7 @@
 
 #include "foundation.h"
 
-using namespace Lumix;
+namespace Lumix {
 
 template <typename T> struct Span {
 	Span()
@@ -72,3 +72,4 @@ template <typename T> struct Span {
 	T* m_begin;
 	T* m_end;
 };
+} // namespace Lumix

@@ -45,12 +45,17 @@ endif()
 
 target_sources(engine
   PRIVATE
-#    ${engine_src}
+    ${engine_src}
     ${CMAKE_CURRENT_LIST_DIR}/EngineStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/EngineStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.hpp
 
+)
+
+target_link_directories(engine
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/luau/lib/win
 )
 
 target_link_libraries(engine
@@ -63,4 +68,11 @@ target_link_libraries(engine
     SpatialPartition
     Zilch
     foundation
+    Luau
+)
+
+target_include_directories(engine
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external
+  ${WELDER_ROOT_DIR}/external/luau/include
 )

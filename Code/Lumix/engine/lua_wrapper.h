@@ -2,7 +2,7 @@
 
 #include "engine/lumix.h"
 
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/metaprogramming.h"
 #include "foundation/path.h"
 

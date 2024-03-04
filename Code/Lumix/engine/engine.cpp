@@ -9,14 +9,14 @@
 #include "engine/plugin.h"
 #include "foundation/job_system.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/page_allocator.h"
 #include "foundation/path.h"
 #include "engine/prefab.h"
 #include "foundation/profiler.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include <lua.h>
 #include <lualib.h>

@@ -4,7 +4,7 @@
 #include "foundation/hash.h"
 #include "foundation/log.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 
 namespace Lumix::reflection {
