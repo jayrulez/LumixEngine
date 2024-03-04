@@ -3,8 +3,8 @@
 #include "foundation/allocators.h"
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
-#include "foundation/string.h"
+#include "foundation/lmath.h"
+#include "foundation/lstring.h"
 #include "engine/resource.h"
 
 namespace Lumix

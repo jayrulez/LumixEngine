@@ -18,11 +18,16 @@ endif()
 
 target_sources(lua_script
   PRIVATE
-#    ${lua_script_src}
+    ${lua_script_src}
     ${CMAKE_CURRENT_LIST_DIR}/LuaScriptStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/LuaScriptStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.hpp
+)
+
+target_link_directories(lua_script
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/luau/lib/win
 )
 
 target_link_libraries(lua_script
@@ -30,5 +35,11 @@ target_link_libraries(lua_script
     Common
     Zilch
     foundation
-	engine
+    engine
+    Luau
+)
+
+target_include_directories(lua_script
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/luau/include
 )

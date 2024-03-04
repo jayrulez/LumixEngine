@@ -14,7 +14,7 @@
 #include "engine/reflection.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include "gui/gui_module.h"
 #include "lua_script/lua_script.h"

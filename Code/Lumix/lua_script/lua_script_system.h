@@ -5,7 +5,7 @@
 #include "foundation/path.h"
 #include "engine/plugin.h"
 #include "engine/resource.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 
 struct lua_State;

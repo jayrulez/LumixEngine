@@ -3,7 +3,7 @@
 
 #include "foundation/allocators.h"
 #include "engine/resource.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 
 namespace Lumix
