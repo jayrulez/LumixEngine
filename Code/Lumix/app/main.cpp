@@ -1,5 +1,8 @@
 #if 1 // set to 0 to build minimal lunex example
 
+#include "foundation/foundation.h"
+#include "foundation/span.h"
+#include "foundation/color.h"
 #include "foundation/allocators.h"
 #include "foundation/atomic.h"
 #include "foundation/command_line_parser.h"

@@ -7,8 +7,8 @@
 #include "Platform/FilePath.hpp"
 #include "Utility/Time.hpp"
 
-extern unsigned char VirtualFileSystemData[];
-extern unsigned int VirtualFileSystemSize;
+//extern unsigned char VirtualFileSystemData[];
+//extern unsigned int VirtualFileSystemSize;
 
 namespace Zero
 {
@@ -258,6 +258,7 @@ String HumanReadableFileSize(u64 bytes)
 
 void PopulateVirtualFileSystemWithZip(void* userData)
 {
+  /*
   ProfileScopeFunction();
   ByteBufferBlock block(VirtualFileSystemData, VirtualFileSystemSize, false);
 
@@ -272,6 +273,7 @@ void PopulateVirtualFileSystemWithZip(void* userData)
     String absolutePath = BuildString("/", archiveEntry.Name);
     AddVirtualFileSystemEntry(absolutePath, &archiveEntry.Full, archiveEntry.ModifiedTime);
   }
+  */
 }
 
 void Download(StringParam fileName, const Array<::byte>& binaryData)

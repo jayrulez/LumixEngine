@@ -9,7 +9,7 @@ endif()
 
 # Cross platform source libraries.
 #add_subdirectory(Assimp)
-add_subdirectory(FreeType)
+#add_subdirectory(FreeType)
 add_subdirectory(Glew)
 #add_subdirectory(Libgit2)
 add_subdirectory(Libpng)

@@ -95,11 +95,16 @@ target_sources(renderer
 
 )
 
+target_link_directories(renderer
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/freetype/lib/win64_vs2017/release
+)
+
 target_link_libraries(renderer
   PUBLIC
     Common
     Zilch
-    FreeType
+    freetype
     foundation
 	  engine
     lua_script
@@ -108,4 +113,5 @@ target_link_libraries(renderer
 target_include_directories(renderer
   PUBLIC
   ${WELDER_ROOT_DIR}/external
+  ${WELDER_ROOT_DIR}/external/freetype/include
 )

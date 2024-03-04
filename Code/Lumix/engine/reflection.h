@@ -4,6 +4,7 @@
 
 #include "foundation/foundation.h"
 #include "foundation/span.h"
+#include "foundation/color.h"
 #include "foundation/delegate_list.h"
 #include "foundation/hash.h"
 #include "foundation/metaprogramming.h"

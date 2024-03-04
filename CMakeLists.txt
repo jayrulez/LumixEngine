@@ -24,8 +24,9 @@ if(WELDER_CCACHE_PATH)
   set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${WELDER_CCACHE_PATH}")
 endif()
 
-project(Welder)
+project(Welder LANGUAGES C CXX)
 
+add_definitions(-D_ITERATOR_DEBUG_LEVEL=0 -DSTBI_NO_STDIO)
 add_definitions(-DWelderMsSinceEpoch=${WELDER_MS_SINCE_EPOCH})
 add_definitions(-DWelderBranchName="${WELDER_BRANCH}")
 add_definitions(-DWelderRevisionId=${WELDER_REVISION})

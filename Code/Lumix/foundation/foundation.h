@@ -100,7 +100,7 @@ template <typename E> void setFlag(E& flags, E flag, bool set) {
 	#pragma warning(error : 4263)
 	#pragma warning(error : 4265)
 	#pragma warning(error : 4296)
-	#pragma warning(error : 4456)
+	//#pragma warning(error : 4456)
 	#pragma warning(error : 4062)
 	#pragma warning(error : 5233)
 	#pragma warning(error : 5245)

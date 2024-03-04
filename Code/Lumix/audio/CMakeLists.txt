@@ -31,6 +31,10 @@ if(BUILD_EDITOR)
   )
 endif()
 
+set(audio_src ${audio_src}
+${WELDER_ROOT_DIR}/external/stb/stb_vorbis.cpp
+)
+
 target_sources(audio
   PRIVATE
     ${audio_src}

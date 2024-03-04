@@ -17,7 +17,24 @@ target_sources(app
 target_link_libraries(app
   PUBLIC
     Common
+    Geometry
+    Meta
+    Platform
+    Serialization
+    SpatialPartition
     Zilch
+    Support
     foundation
     engine
+	animation
+	audio
+	gui
+	lua_script
+	navigation
+	physics
+	renderer
+  GL
+  freetype
 )
+
+welder_copy_from_linked_libraries(app)
