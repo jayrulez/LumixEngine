@@ -20,6 +20,15 @@ set(WELDER_C_CXX_FLAGS "\
   -bigobj\
 ")
 
+#set(WELDER_C_CXX_FLAGS_DEBUG "\
+#  -Zi\
+#  -MDd\
+#  -GS\
+#  -Od\
+#  -Ob0\
+#  -Oy-\
+#")
+
 set(WELDER_C_CXX_FLAGS_DEBUG "\
   -Zi\
   -MDd\
