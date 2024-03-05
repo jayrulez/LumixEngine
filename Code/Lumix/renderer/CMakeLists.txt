@@ -83,39 +83,39 @@ if(BUILD_EDITOR)
     ${CMAKE_CURRENT_LIST_DIR}/editor/world_viewer.h
 
 
-    ${WELDER_ROOT_DIR}/external/meshoptimizer/allocator.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/clusterizer.cpp
-    ${WELDER_ROOT_DIR}/external/meshoptimizer/indexcodec.cpp
-    ${WELDER_ROOT_DIR}/external/meshoptimizer/indexgenerator.cpp
-    ${WELDER_ROOT_DIR}/external/meshoptimizer/meshoptimizer.h
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/overdrawanalyzer.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/overdrawoptimizer.cpp
-    ${WELDER_ROOT_DIR}/external/meshoptimizer/simplifier.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/spatialorder.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/stripifier.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vcacheanalyzer.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vcacheoptimizer.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vertexcodec.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vertexfilter.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vfetchanalyzer.cpp
-#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vfetchoptimizer.cpp
+    ${WELDER_ROOT_DIR}/External/meshoptimizer/allocator.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/clusterizer.cpp
+    ${WELDER_ROOT_DIR}/External/meshoptimizer/indexcodec.cpp
+    ${WELDER_ROOT_DIR}/External/meshoptimizer/indexgenerator.cpp
+    ${WELDER_ROOT_DIR}/External/meshoptimizer/meshoptimizer.h
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/overdrawanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/overdrawoptimizer.cpp
+    ${WELDER_ROOT_DIR}/External/meshoptimizer/simplifier.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/spatialorder.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/stripifier.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vcacheanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vcacheoptimizer.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vertexcodec.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vertexfilter.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vfetchanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/External/meshoptimizer/vfetchoptimizer.cpp
 
-    ${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.h
-    ${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c
+    ${WELDER_ROOT_DIR}/External/mikktspace/mikktspace.h
+    ${WELDER_ROOT_DIR}/External/mikktspace/mikktspace.c
     
-    ${WELDER_ROOT_DIR}/external/openfbx/libdeflate.h
-    ${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c
-    ${WELDER_ROOT_DIR}/external/openfbx/ofbx.h
-    ${WELDER_ROOT_DIR}/external/openfbx/ofbx.cpp
+    ${WELDER_ROOT_DIR}/External/openfbx/libdeflate.h
+    ${WELDER_ROOT_DIR}/External/openfbx/libdeflate.c
+    ${WELDER_ROOT_DIR}/External/openfbx/ofbx.h
+    ${WELDER_ROOT_DIR}/External/openfbx/ofbx.cpp
 
   )
 
-  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c)
-  set_source_files_properties(${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c PROPERTIES LANGUAGE CXX)
+  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/External/mikktspace/mikktspace.c)
+  set_source_files_properties(${WELDER_ROOT_DIR}/External/mikktspace/mikktspace.c PROPERTIES LANGUAGE CXX)
   
 
-  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c)
-  set_source_files_properties(${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c PROPERTIES LANGUAGE CXX)
+  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/External/openfbx/libdeflate.c)
+  set_source_files_properties(${WELDER_ROOT_DIR}/External/openfbx/libdeflate.c PROPERTIES LANGUAGE CXX)
 endif()
 
 target_sources(renderer
@@ -130,7 +130,7 @@ target_sources(renderer
 
 target_link_directories(renderer
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/freetype/lib/win64_vs2017/release
+  ${WELDER_ROOT_DIR}/External/freetype/lib/win64_vs2017/release
 )
 
 target_link_libraries(renderer
@@ -152,6 +152,6 @@ endif()
 
 target_include_directories(renderer
   PUBLIC
-  ${WELDER_ROOT_DIR}/external
-  ${WELDER_ROOT_DIR}/external/freetype/include
+  ${WELDER_ROOT_DIR}/External
+  ${WELDER_ROOT_DIR}/External/freetype/include
 )

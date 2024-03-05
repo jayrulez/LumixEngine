@@ -61,7 +61,7 @@ target_sources(editor
 
 target_link_directories(editor
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/luau/lib/win
+  ${WELDER_ROOT_DIR}/External/luau/lib/win
 )
 
 target_link_libraries(editor
@@ -76,5 +76,5 @@ target_link_libraries(editor
 
 target_include_directories(editor
   PUBLIC
-  ${WELDER_ROOT_DIR}/external
+  ${WELDER_ROOT_DIR}/External
 )

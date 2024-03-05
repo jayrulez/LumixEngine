@@ -21,7 +21,7 @@ endif()
 
 target_link_directories(physics
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/physx/lib/win
+  ${WELDER_ROOT_DIR}/External/physx/lib/win
 )
 
 target_sources(physics
@@ -68,7 +68,7 @@ endif()
 
 target_include_directories(physics
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/physx/include
+  ${WELDER_ROOT_DIR}/External/physx/include
 )
 
 target_compile_definitions(physics

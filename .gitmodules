@@ -1,24 +1,24 @@
-[submodule "Code/External/Glew/Repo"]
-	path = Code/External/Glew/Repo
+[submodule "External/Glew/Repo"]
+	path = External/Glew/Repo
 	url = https://github.com/WelderFoundation/glew.git
     branch = welder_updates2
-[submodule "Code/External/Libpng/Repo"]
-	path = Code/External/Libpng/Repo
+[submodule "External/Libpng/Repo"]
+	path = External/Libpng/Repo
 	url = https://github.com/WelderFoundation/libpng.git
     branch = welder_updates2
-[submodule "Code/External/Nvtt/Repo"]
-	path = Code/External/Nvtt/Repo
+[submodule "External/Nvtt/Repo"]
+	path = External/Nvtt/Repo
 	url = https://github.com/WelderFoundation/nvidia-texture-tools.git
     branch = welder_updates2
-[submodule "Code/External/Opus/Repo"]
-	path = Code/External/Opus/Repo
+[submodule "External/Opus/Repo"]
+	path = External/Opus/Repo
 	url = https://github.com/WelderFoundation/opus.git
     branch = welder_updates2
-[submodule "Code/External/SDL/Repo"]
-	path = Code/External/SDL/Repo
+[submodule "External/SDL/Repo"]
+	path = External/SDL/Repo
 	url = https://github.com/WelderFoundation/SDL.git
     branch = sdlupdate_sdl2
-[submodule "Code/External/ZLib/Repo"]
-	path = Code/External/ZLib/Repo
+[submodule "External/ZLib/Repo"]
+	path = External/ZLib/Repo
 	url = https://github.com/WelderFoundation/zlib.git
     branch = welder_updates

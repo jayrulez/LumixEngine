@@ -44,26 +44,26 @@ if (${WELDER_PLATFORM} STREQUAL "Linux")
 endif()
 
 set(engine_src ${engine_src}
-  ${WELDER_ROOT_DIR}/external/lz4/lz4.h
-  ${WELDER_ROOT_DIR}/external/lz4/lz4.c
+  ${WELDER_ROOT_DIR}/External/lz4/lz4.h
+  ${WELDER_ROOT_DIR}/External/lz4/lz4.c
 
-  ${WELDER_ROOT_DIR}/external/imgui/IconsFontAwesome5.h
-  ${WELDER_ROOT_DIR}/external/imgui/imconfig.h
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui.h
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui_demo.cpp
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui_draw.cpp
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui_freetype.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_freetype.h
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_internal.h
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui_tables.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_unity.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_user.h
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_user.inl
-#  ${WELDER_ROOT_DIR}/external/imgui/imgui_widgets.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imstb_rectpack.h
-  ${WELDER_ROOT_DIR}/external/imgui/imstb_textedit.h
-  ${WELDER_ROOT_DIR}/external/imgui/imstb_truetype.h
+  ${WELDER_ROOT_DIR}/External/imgui/IconsFontAwesome5.h
+  ${WELDER_ROOT_DIR}/External/imgui/imconfig.h
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui.cpp
+  ${WELDER_ROOT_DIR}/External/imgui/imgui.h
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui_demo.cpp
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui_draw.cpp
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui_freetype.cpp
+  ${WELDER_ROOT_DIR}/External/imgui/imgui_freetype.h
+  ${WELDER_ROOT_DIR}/External/imgui/imgui_internal.h
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui_tables.cpp
+  ${WELDER_ROOT_DIR}/External/imgui/imgui_unity.cpp
+  ${WELDER_ROOT_DIR}/External/imgui/imgui_user.h
+  ${WELDER_ROOT_DIR}/External/imgui/imgui_user.inl
+#  ${WELDER_ROOT_DIR}/External/imgui/imgui_widgets.cpp
+  ${WELDER_ROOT_DIR}/External/imgui/imstb_rectpack.h
+  ${WELDER_ROOT_DIR}/External/imgui/imstb_textedit.h
+  ${WELDER_ROOT_DIR}/External/imgui/imstb_truetype.h
 )
 
 target_sources(engine
@@ -76,13 +76,13 @@ target_sources(engine
 
 )
 
-welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/external/lz4/lz4.c)
+welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/External/lz4/lz4.c)
 
-set_source_files_properties(${WELDER_ROOT_DIR}/external/lz4/lz4.c PROPERTIES LANGUAGE CXX)
+set_source_files_properties(${WELDER_ROOT_DIR}/External/lz4/lz4.c PROPERTIES LANGUAGE CXX)
 
 target_link_directories(engine
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/luau/lib/win
+  ${WELDER_ROOT_DIR}/External/luau/lib/win
 )
 
 target_link_libraries(engine
@@ -100,7 +100,7 @@ target_link_libraries(engine
 
 target_include_directories(engine
   PUBLIC
-  ${WELDER_ROOT_DIR}/external
-  ${WELDER_ROOT_DIR}/external/luau/include
-  ${WELDER_ROOT_DIR}/external/freetype/include
+  ${WELDER_ROOT_DIR}/External
+  ${WELDER_ROOT_DIR}/External/luau/include
+  ${WELDER_ROOT_DIR}/External/freetype/include
 )

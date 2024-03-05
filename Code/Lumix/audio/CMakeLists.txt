@@ -32,7 +32,7 @@ if(BUILD_EDITOR)
 endif()
 
 set(audio_src ${audio_src}
-${WELDER_ROOT_DIR}/external/stb/stb_vorbis.cpp
+${WELDER_ROOT_DIR}/External/stb/stb_vorbis.cpp
 )
 
 target_sources(audio

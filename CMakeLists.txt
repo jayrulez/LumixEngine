@@ -176,4 +176,9 @@ set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL         "${CMAKE_EXE_LINKER_FLAGS_MINSIZER
 
 add_definitions(-DSTATIC_PLUGINS)
 
+add_subdirectory(External)
 add_subdirectory(Code)
+
+# todo: copy dll deps to projects
+#set_target_properties(app PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")
+#set_target_properties(studio PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")

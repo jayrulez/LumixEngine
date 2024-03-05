@@ -1,4 +1,3 @@
-add_subdirectory(External)
 add_subdirectory(Foundation)
 
 add_definitions(-D_HAS_EXCEPTIONS=0)

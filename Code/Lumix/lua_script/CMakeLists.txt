@@ -27,7 +27,7 @@ target_sources(lua_script
 
 target_link_directories(lua_script
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/luau/lib/win
+  ${WELDER_ROOT_DIR}/External/luau/lib/win
 )
 
 target_link_libraries(lua_script
@@ -41,7 +41,7 @@ target_link_libraries(lua_script
 
 target_include_directories(lua_script
   PUBLIC
-  ${WELDER_ROOT_DIR}/external/luau/include
+  ${WELDER_ROOT_DIR}/External/luau/include
 )
 
 if(BUILD_EDITOR)
