@@ -132,10 +132,10 @@ struct AnimationAssetBrowserPlugin : AssetBrowser::IPlugin {
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
 
-			const Array<Animation::RotationTrack>& rotations = m_resource->getRotations();
-			const Array<Animation::ConstRotationTrack>& const_rotations = m_resource->getConstRotations();
-			const Array<Animation::TranslationTrack>& translations = m_resource->getTranslations();
-			const Array<Animation::ConstTranslationTrack>& const_translations = m_resource->getConstTranslations();
+			const Lumix::Array<Animation::RotationTrack>& rotations = m_resource->getRotations();
+			const Lumix::Array<Animation::ConstRotationTrack>& const_rotations = m_resource->getConstRotations();
+			const Lumix::Array<Animation::TranslationTrack>& translations = m_resource->getTranslations();
+			const Lumix::Array<Animation::ConstTranslationTrack>& const_translations = m_resource->getConstTranslations();
 
 			ImGuiEx::Label("Skeleton");
 			saveUndo(m_app.getAssetBrowser().resourceInput("##ske", m_parent_meta.skeleton, Model::TYPE));

@@ -11,7 +11,7 @@
 #include "engine/engine.h"
 #include "foundation/geometry.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"
@@ -323,17 +323,17 @@ private:
 		const float rr = module.getRectRightRelative(e);
 
 		const Vec2 bottom_right = { rect.x + rect.w, rect.y + rect.h };
-		draw.addRect({ rect.x, rect.y }, bottom_right, Color::BLACK, 1);
-		draw.addRect({ rect.x - 1, rect.y - 1 }, bottom_right + Vec2(1, 1), Color::WHITE, 1);
+		draw.addRect({rect.x, rect.y}, bottom_right, Lumix::Color::BLACK, 1);
+		draw.addRect({rect.x - 1, rect.y - 1}, bottom_right + Vec2(1, 1), Lumix::Color::WHITE, 1);
 		const Vec2 mid = { rect.x + rect.w * 0.5f, rect.y + rect.h * 0.5f };
 
 		auto drawAnchor = [&draw](const Vec2& pos, bool top, bool left){
 			const float SIZE = 10;
 			const Vec2 h = left ? Vec2(-SIZE, 0) : Vec2(SIZE, 0);
 			const Vec2 v = top ? Vec2(0, -SIZE) : Vec2(0, SIZE);
-			draw.addLine(pos, pos + v, Color::RED, 1);
-			draw.addLine(pos + h, pos + v, Color::RED, 1);
-			draw.addLine(pos + h, pos, Color::RED, 1);
+			draw.addLine(pos, pos + v, Lumix::Color::RED, 1);
+			draw.addLine(pos + h, pos + v, Lumix::Color::RED, 1);
+			draw.addLine(pos + h, pos, Lumix::Color::RED, 1);
 		};
 
 		drawAnchor(Vec2(parent_rect.x + parent_rect.w * lr, parent_rect.y + parent_rect.h * tr), true, true);
@@ -347,8 +347,8 @@ private:
 			float dy = pos.y - mouse_pos.y;
 			bool is_hovered = fabsf(dx) < SIZE && fabsf(dy) < SIZE;
 			
-			draw.addRectFilled(pos - Vec2(SIZE, SIZE), pos + Vec2(SIZE, SIZE), is_hovered ? Color::WHITE : Color{0xff, 0xff, 0xff, 0x77});
-			draw.addRect(pos - Vec2(SIZE, SIZE), pos + Vec2(SIZE, SIZE), Color::BLACK, 1);
+			draw.addRectFilled(pos - Vec2(SIZE, SIZE), pos + Vec2(SIZE, SIZE), is_hovered ? Lumix::Color::WHITE : Lumix::Color{0xff, 0xff, 0xff, 0x77});
+			draw.addRect(pos - Vec2(SIZE, SIZE), pos + Vec2(SIZE, SIZE), Lumix::Color::BLACK, 1);
 
 			return is_hovered && ImGui::IsMouseClicked(0);
 		};
@@ -521,7 +521,7 @@ private:
 
 			if (ImGui::IsMouseClicked(0) && ImGui::IsItemHovered() && m_mouse_mode == MouseMode::NONE)
 			{
-				const Array<EntityRef>& selected = editor.getSelectedEntities();
+				const Lumix::Array<EntityRef>& selected = editor.getSelectedEntities();
 				bool parent_selected = false;
 				if (!selected.empty()) {
 					const EntityPtr parent = editor.getWorld()->getParent(selected[0]);
@@ -660,7 +660,7 @@ private:
 
 
 	void layout(u32 cols, u32 row_height, u32 row_spacing, u32 col_spacing, WorldEditor& editor) {
-		const Array<EntityRef>& selected = editor.getSelectedEntities();
+		const Lumix::Array<EntityRef>& selected = editor.getSelectedEntities();
 		ASSERT(!selected.empty());
 		ASSERT(cols > 0);
 		const World& world = *editor.getWorld();

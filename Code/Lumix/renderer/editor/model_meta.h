@@ -3,7 +3,7 @@
 #include "foundation/allocator.h"
 #include "engine/lua_wrapper.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "fbx_importer.h"
 
 

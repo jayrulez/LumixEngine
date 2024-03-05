@@ -9,7 +9,7 @@ set(studio_src
 if (${WELDER_PLATFORM} STREQUAL "Windows")
   set(studio_src ${studio_src}
     ${CMAKE_CURRENT_LIST_DIR}/win/main.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/win/resource.rc
+#    ${CMAKE_CURRENT_LIST_DIR}/win/resource.rc
   )
 endif()
 
@@ -30,8 +30,22 @@ target_sources(studio
 target_link_libraries(studio
   PUBLIC
     Common
+    Geometry
+    Meta
+    Platform
+    Serialization
+    SpatialPartition
     Zilch
+    Support
     foundation
-	  engine
-    editor
+    engine
+	animation
+	audio
+	gui
+	lua_script
+	navigation
+	physics
+	renderer
+    GL
+    freetype
 )

@@ -65,6 +65,13 @@ target_link_libraries(navigation
     recast
 )
 
+if(BUILD_EDITOR)
+  target_link_libraries(navigation
+    PUBLIC
+      editor
+  )
+endif()
+
 target_include_directories(navigation
   PUBLIC
   ${WELDER_ROOT_DIR}/external/recast/include

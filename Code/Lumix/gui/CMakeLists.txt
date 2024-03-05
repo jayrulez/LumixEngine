@@ -36,3 +36,10 @@ target_link_libraries(gui
 	  engine
     renderer
 )
+
+if(BUILD_EDITOR)
+  target_link_libraries(gui
+    PUBLIC
+      editor
+  )
+endif()

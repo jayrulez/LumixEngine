@@ -5,6 +5,8 @@
 
 #include "engine/lumix.h"
 
+#include "foundation/color.h"
+#include "foundation/span.h"
 #include "foundation/allocators.h"
 #include "foundation/associative_array.h"
 #include "foundation/atomic.h"
@@ -18,7 +20,7 @@
 #include "foundation/path.h"
 #include "foundation/profiler.h"
 #include "foundation/queue.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "animation/animation.h"
 #include "animation/animation_module.h"
@@ -66,6 +68,7 @@
 #include "stb/stb_image.h"
 #include <stb/stb_image_resize2.h>
 
+#undef has
 
 using namespace Lumix;
 
@@ -150,7 +153,7 @@ struct Input {
 	}
 
 	IAllocator& allocator;
-	Array<Image> images;
+	Lumix::Array<Image> images;
 	u32 w;
 	u32 h;
 	u32 slices;
@@ -337,7 +340,7 @@ static float computeCoverage(Span<const u8> data, u32 w, u32 h, float ref_norm) 
 	const u8 ref = u8(clamp(255 * ref_norm, 0.f, 255.f));
 
 	u32 count = 0;
-	const Color* pixels = (const Color*)data.begin();
+	const Lumix::Color* pixels = (const Lumix::Color*)data.begin();
 	for (u32 i = 0; i < w * h; ++i) {
 		if (pixels[i].a > ref) ++count;
 	}
@@ -347,7 +350,7 @@ static float computeCoverage(Span<const u8> data, u32 w, u32 h, float ref_norm) 
 
 static void scaleCoverage(Span<u8> data, u32 w, u32 h, float ref_norm, float wanted_coverage) {
 	u32 histogram[256] = {};
-	Color* pixels = (Color*)data.begin();
+	Lumix::Color* pixels = (Lumix::Color*)data.begin();
 	for (u32 i = 0; i < w * h; ++i) {
 		++histogram[pixels[i].a];
 	}
@@ -374,8 +377,8 @@ static void compress(void (*compressor)(Span<const u8>, OutputMemoryStream&, u32
 	const u32 block_size = src_data.has_alpha || src_data.is_normalmap ? 16 : 8;
 	const u32 total_compressed_size = getCompressedSize(src_data.w, src_data.h, mips, faces, block_size);
 	dst.reserve(dst.size() + total_compressed_size);
-	Array<u8> mip_data(allocator);
-	Array<u8> prev_mip(allocator);
+	Lumix::Array<u8> mip_data(allocator);
+	Lumix::Array<u8> prev_mip(allocator);
 
 	const float coverage = options.scale_coverage_ref >= 0.f
 		? computeCoverage(src_data.get(0, 0, 0).pixels, src_data.w, src_data.h, options.scale_coverage_ref) 
@@ -554,7 +557,7 @@ struct SphericalHarmonics {
 
 	// https://github.com/TheRealMJP/LowResRendering/blob/master/SampleFramework11/v1.01/Graphics/SH.cpp
 	// https://www.gamedev.net/forums/topic/699721-spherical-harmonics-irradiance-from-hdr/
-	void compute(const Array<Vec4>& pixels) {
+	void compute(const Lumix::Array<Vec4>& pixels) {
 		PROFILE_FUNCTION();
 		for (u32 i = 0; i < 9; ++i) {
 			coefs[i] = Vec3(0);
@@ -937,13 +940,13 @@ struct MaterialPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 
 	void toggleWireframe() {
 		WorldEditor& editor = m_app.getWorldEditor();
-		const Array<EntityRef>& selected = editor.getSelectedEntities();
+		const Lumix::Array<EntityRef>& selected = editor.getSelectedEntities();
 		if (selected.empty()) return;
 
 		World& world = *editor.getWorld();
 		RenderModule& module = *(RenderModule*)world.getModule(MODEL_INSTANCE_TYPE);
 
-		Array<Material*> materials(m_allocator);
+		Lumix::Array<Material*> materials(m_allocator);
 		for (EntityRef e : selected) {
 			if (world.hasComponent(e, MODEL_INSTANCE_TYPE)) {
 				Model* model = module.getModelInstanceModel(e);
@@ -1420,11 +1423,11 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 			}
 
 			auto applyTint = [&](){
-				if (m_tint != Color::WHITE) {
-					Color tint = m_tint;
+				if (m_tint != Lumix::Color::WHITE) {
+					Lumix::Color tint = m_tint;
 					u32* ptr = (u32*)resized_data.getMutableData();
 					for (u32 i = 0,c = (u32)resized_data.size() / 4; i < c; ++i) {
-						Color col(ptr[i]);
+						Lumix::Color col(ptr[i]);
 						col *= tint;
 						ptr[i] = col.abgr();
 					}
@@ -1503,7 +1506,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		Path m_in_path; 
 		Path m_out_path;
 		TextureTileJob* m_next = nullptr;
-		Color m_tint = Color::WHITE;
+		Lumix::Color m_tint = Lumix::Color::WHITE;
 	};
 
 	void update() override {
@@ -1517,7 +1520,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		jobs::runEx(job, &TextureTileJob::execute, nullptr, jobs::getWorkersCount() - 1);
 	}
 
-	bool createTile(const char* in_path, const char* out_path, Color tint) {
+	bool createTile(const char* in_path, const char* out_path, Lumix::Color tint) {
 		if (!Path::hasExtension(in_path, "raw")) {
 			FileSystem& fs = m_app.getEngine().getFileSystem();
 			TextureTileJob* job = LUMIX_NEW(m_allocator, TextureTileJob)(m_app, fs, m_allocator);
@@ -1536,7 +1539,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 
 	bool createTile(const char* in_path, const char* out_path, ResourceType type) override {
 		if (type != Texture::TYPE) return false;
-		return createTile(in_path, out_path, Color::WHITE);
+		return createTile(in_path, out_path, Lumix::Color::WHITE);
 	}
 
 	bool compileComposite(const OutputMemoryStream& src_data, OutputMemoryStream& dst, const TextureMeta& meta, StringView src_path) {
@@ -1609,7 +1612,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		if (!stb_data) return false;
 
 		const u8* data;
-		Array<u8> inverted_y_data(m_allocator);
+		Lumix::Array<u8> inverted_y_data(m_allocator);
 		if (meta.is_normalmap && meta.invert_normal_y) {
 			inverted_y_data.resize(w * h * 4);
 			for (i32 y = 0; y < h; ++y) {
@@ -1915,7 +1918,7 @@ struct ModelMultiEditor {
 	}
 
 	StudioApp& m_app;
-	Array<Asset> m_assets;
+	Lumix::Array<Asset> m_assets;
 	bool m_open = true;
 };
 
@@ -2016,10 +2019,10 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 						FBXImporter importer(m_app);
 						importer.init();
 						IAllocator& allocator = m_app.getAllocator();
-						Array<u32> gb0(allocator); 
-						Array<u32> gb1(allocator);
-						Array<u16> gbdepth(allocator);
-						Array<u32> shadow(allocator); 
+						Lumix::Array<u32> gb0(allocator); 
+						Lumix::Array<u32> gb1(allocator);
+						Lumix::Array<u16> gbdepth(allocator);
+						Lumix::Array<u32> shadow(allocator); 
 						IVec2 tile_size;
 						importer.createImpostorTextures(m_resource, gb0, gb1, gbdepth, shadow, tile_size, m_meta.bake_impostor_normals);
 						postprocessImpostor(gb0, gb1, shadow, tile_size, allocator);
@@ -2058,7 +2061,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 							if (gpu::isOriginBottomLeft()) {
 								res = file.write(gbdepth.begin(), gbdepth.byte_size()) && res;
 							} else {
-								Array<u16> flipped_depth(m_app.getAllocator());
+								Lumix::Array<u16> flipped_depth(m_app.getAllocator());
 								flipped_depth.resize(gbdepth.size());
 								for (u32 j = 0; j < header.height; ++j) {
 									for (u32 i = 0; i < header.width; ++i) {
@@ -2531,7 +2534,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 			importer.setSource(Path(path), true, false);
 
 			if(meta.split) {
-				const Array<FBXImporter::ImportMesh>& meshes = importer.getMeshes();
+				const Lumix::Array<FBXImporter::ImportMesh>& meshes = importer.getMeshes();
 				for (int i = 0; i < meshes.size(); ++i) {
 					char mesh_name[256];
 					importer.getImportMeshName(meshes[i], mesh_name);
@@ -2552,7 +2555,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 
 			if (!meta.ignore_animations) {
 				if (meta.clips.empty()) {
-					const Array<FBXImporter::ImportAnimation>& animations = importer.getAnimations();
+					const Lumix::Array<FBXImporter::ImportAnimation>& animations = importer.getAnimations();
 					for (const FBXImporter::ImportAnimation& anim : animations) {
 						Path tmp(anim.name, ".ani:", path);
 						compiler.addResource(ResourceType("animation"), tmp);
@@ -2659,12 +2662,12 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 	}
 
 
-	static void postprocessImpostor(Array<u32>& gb0, Array<u32>& gb1, Array<u32>& shadow, const IVec2& tile_size, IAllocator& allocator) {
+	static void postprocessImpostor(Lumix::Array<u32>& gb0, Lumix::Array<u32>& gb1, Lumix::Array<u32>& shadow, const IVec2& tile_size, IAllocator& allocator) {
 		struct Cell {
 			i16 x, y;
 		};
 		const IVec2 size = tile_size * 9;
-		Array<Cell> cells(allocator);
+		Lumix::Array<Cell> cells(allocator);
 		cells.resize(gb0.size());
 		const u32* data = gb0.begin();
 		for (i32 j = 0; j < size.y; ++j) {
@@ -2737,7 +2740,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 			}
 		}
 
-		Array<u32> tmp(allocator);
+		Lumix::Array<u32> tmp(allocator);
 		tmp.resize(gb0.size());
 		if (cells[0].x >= 0) {
 			for (i32 j = 0; j < size.y; ++j) {
@@ -2853,7 +2856,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 					u32* p = (u32*)m_tile.data.getMutableData();
 					for (u32 y = 0; y < AssetBrowser::TILE_SIZE >> 1; ++y) {
 						for (u32 x = 0; x < AssetBrowser::TILE_SIZE; ++x) {
-							swap(p[x + y * AssetBrowser::TILE_SIZE], p[x + (AssetBrowser::TILE_SIZE - y - 1) * AssetBrowser::TILE_SIZE]);
+							Lumix::swap(p[x + y * AssetBrowser::TILE_SIZE], p[x + (AssetBrowser::TILE_SIZE - y - 1) * AssetBrowser::TILE_SIZE]);
 						}
 					}
 				}
@@ -3013,11 +3016,11 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		const Path out_path(".lumix/asset_tiles/", material->getPath().getHash(), ".lbc");
 		if (material->getUniformCount() > 0 && material->getUniform(0).name_hash == RuntimeHash("Material color")) {
 			const Vec4 v = *(Vec4*)material->getUniform(0).vec4;
-			Color tint(u8(v.x * 255), u8(v.y * 255), u8(v.z * 255), u8(v.w * 255));
+			Lumix::Color tint(u8(v.x * 255), u8(v.y * 255), u8(v.z * 255), u8(v.w * 255));
 			m_texture_plugin->createTile(in_path.c_str(), out_path.c_str(), tint);
 		}
 		else {
-			m_texture_plugin->createTile(in_path.c_str(), out_path.c_str(), Color::WHITE);
+			m_texture_plugin->createTile(in_path.c_str(), out_path.c_str(), Lumix::Color::WHITE);
 		}
 	}
 
@@ -3198,7 +3201,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		FilePathHash out_path_hash;
 		OutputMemoryStream data;
 		gpu::TextureHandle texture = gpu::INVALID_TEXTURE;
-		Array<Job*> queue;
+		Lumix::Array<Job*> queue;
 		bool waiting = false;
 	} m_tile;
 	
@@ -3384,8 +3387,7 @@ void captureCubemap(StudioApp& app
 	, World& world
 	, Pipeline& pipeline
 	, const u32 texture_size
-	, const DVec3& position
-	, Array<Vec4>& data
+	, const DVec3& position, Lumix::Array<Vec4>& data
 	, F&& f) {
 	memoryBarrier();
 
@@ -3479,7 +3481,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 			const u32 mip_size = texture_size >> mip;
 			for (int face = 0; face < 6; ++face) {
 				TextureCompressor::Input::Image& img = input.add(face, 0, mip);
-				Color* rgbm = (Color*)img.pixels.getMutableData();
+				Lumix::Color* rgbm = (Lumix::Color*)img.pixels.getMutableData();
 				for (u32 j = 0, c = mip_size * mip_size; j < c; ++j) {
 					const float m = clamp(maximum(mip_pixels[j].x, mip_pixels[j].y, mip_pixels[j].z), 1 / 64.f, 4.f);
 					rgbm[j].r = u8(clamp(mip_pixels[j].x / m * 255 + 0.5f, 0.f, 255.f));
@@ -3556,7 +3558,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 		DVec3 position;
 
 		World& world;
-		Array<Vec4> data;
+		Lumix::Array<Vec4> data;
 		SphericalHarmonics sh;
 		bool render_dispatched = false;
 		bool done = false;
@@ -3675,7 +3677,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 		
 		jobs::Signal signal;
 		jobs::setRed(&signal);
-		Array<u8> tmp(m_app.getAllocator());
+		Lumix::Array<u8> tmp(m_app.getAllocator());
 		renderer->pushJob([&](DrawStream& stream){
 			gpu::TextureHandle src = gpu::allocTextureHandle();
 			gpu::TextureHandle dst = gpu::allocTextureHandle();
@@ -3737,7 +3739,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 				EnvironmentProbePlugin* plugin;
 				u64 guid;
 				jobs::Signal* signal;
-				Array<u8>* data;
+				Lumix::Array<u8>* data;
 				u32 texture_size;
 			};
 
@@ -3750,7 +3752,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 	}
 
 	void processData(ProbeJob& job) {
-		Array<Vec4>& data = job.data;
+		Lumix::Array<Vec4>& data = job.data;
 		const u32 texture_size = (u32)sqrtf(data.size() / 6.f);
 				
 		const bool ndc_bottom_left = gpu::isOriginBottomLeft();
@@ -3821,7 +3823,7 @@ struct EnvironmentProbePlugin final : PropertyGrid::IPlugin
 	gpu::ProgramHandle m_ibl_filter_program = gpu::INVALID_PROGRAM;
 	
 	// TODO to be used with http://casual-effects.blogspot.com/2011/08/plausible-environment-lighting-in-two.html
-	Array<ProbeJob*> m_probes;
+	Lumix::Array<ProbeJob*> m_probes;
 	u32 m_done_counter = 0;
 	u32 m_probe_counter = 0;
 };
@@ -3928,7 +3930,7 @@ struct InstancedModelPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 		EntityRef entity;
 		Vec2 center_xz;
 		float radius_squared;
-		Array<InstancedModel::InstanceData> instances;
+		Lumix::Array<InstancedModel::InstanceData> instances;
 	};
 
 	struct AddCommand : IEditorCommand {
@@ -3965,7 +3967,7 @@ struct InstancedModelPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 		bool merge(IEditorCommand& command) override { return false; }
 
 		const char* getType() override { return "add_instanced_model_instances"; }
-		Array<InstancedModel::InstanceData> instances;
+		Lumix::Array<InstancedModel::InstanceData> instances;
 		EntityRef entity;
 		WorldEditor& editor;
 	};
@@ -3990,7 +3992,7 @@ struct InstancedModelPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 
 	Component getComponent() {
 		WorldEditor& editor = m_app.getWorldEditor();
-		const Array<EntityRef>& selected_entities = editor.getSelectedEntities();
+		const Lumix::Array<EntityRef>& selected_entities = editor.getSelectedEntities();
 		if (selected_entities.size() != 1) return { nullptr };
 
 		World& world = *editor.getWorld();
@@ -4067,7 +4069,7 @@ struct InstancedModelPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 
 				const bool remove = ImGui::GetIO().KeyCtrl; // TODO
 
-				Array<InstancedModel::InstanceData> existing(m_app.getAllocator());
+				Lumix::Array<InstancedModel::InstanceData> existing(m_app.getAllocator());
 				Vec2 center_xz = Vec3(hit_pos - origin).xz();
 				const float model_radius = cmp.im->model->getOriginBoundingRadius();
 				const float radius_squared = (m_brush_radius + 2 * model_radius) * (m_brush_radius + 2 * model_radius);
@@ -4403,7 +4405,7 @@ struct ProceduralGeomPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 		if (!m_is_open) return false;
 
 		WorldEditor& editor = view.getEditor();
-		const Array<EntityRef>& selected = editor.getSelectedEntities();
+		const Lumix::Array<EntityRef>& selected = editor.getSelectedEntities();
 		if (selected.size() != 1) return false;
 
 		const EntityRef entity = selected[0];
@@ -4449,7 +4451,7 @@ struct ProceduralGeomPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 	void drawCursor(WorldEditor& editor, RenderModule& module, EntityRef entity, const DVec3& center) const {
 		if (!m_is_open) return;
 		WorldView& view = editor.getView();
-		addCircle(view, center, m_brush_size, Vec3(0, 1, 0), Color::GREEN);
+		addCircle(view, center, m_brush_size, Vec3(0, 1, 0), Lumix::Color::GREEN);
 		const ProceduralGeometry& pg = module.getProceduralGeometry(entity);
 
 		if (pg.vertex_data.size() == 0) return;
@@ -4466,7 +4468,7 @@ struct ProceduralGeomPlugin final : PropertyGrid::IPlugin, StudioApp::MousePlugi
 			Vec3 p;
 			memcpy(&p, data + stride * i, sizeof(p));
 			if (squaredLength(center_local - p) < R2) {
-				addCircle(view, tr.transform(p), 0.1f, Vec3(0, 1, 0), Color::BLUE);
+				addCircle(view, tr.transform(p), 0.1f, Vec3(0, 1, 0), Lumix::Color::BLUE);
 			}
 		}
 	}
@@ -4789,7 +4791,7 @@ struct RenderInterfaceImpl final : RenderInterface
 		Texture* texture;
 		bool loaded;
 	};
-	HashMap<void*, TextureItem> m_textures;
+	Lumix::HashMap<void*, TextureItem> m_textures;
 };
 
 
@@ -4972,7 +4974,7 @@ struct EditorUIRenderPlugin final : StudioApp::GUIPlugin
 
 	StudioApp& m_app;
 	Engine& m_engine;
-	HashMap<void*, gpu::ProgramHandle> m_programs;
+	Lumix::HashMap<void*, gpu::ProgramHandle> m_programs;
 	gpu::TextureHandle m_texture;
 	Local<RenderInterfaceImpl> m_render_interface;
 };
@@ -5305,12 +5307,12 @@ struct StudioAppPlugin : StudioApp::IPlugin
 
 		const DVec3 pos = world.getPosition((EntityRef)light.entity);
 		if (fov > PI) {
-			addSphere(view, pos, range, Color::BLUE);
+			addSphere(view, pos, range, Lumix::Color::BLUE);
 		}
 		else {
 			const Quat rot = world.getRotation((EntityRef)light.entity);
 			const float t = tanf(fov * 0.5f);
-			addCone(view, pos, rot.rotate(Vec3(0, 0, -range)), rot.rotate(Vec3(0, range * t, 0)), rot.rotate(Vec3(range * t, 0, 0)), Color::BLUE);
+			addCone(view, pos, rot.rotate(Vec3(0, 0, -range)), rot.rotate(Vec3(0, range * t, 0)), rot.rotate(Vec3(range * t, 0, 0)), Lumix::Color::BLUE);
 		}
 	}
 
@@ -5334,18 +5336,18 @@ struct StudioAppPlugin : StudioApp::IPlugin
 		const Vec3 right = world.getRotation(entity).rotate(Vec3(1, 0, 0));
 		const Vec3 up = world.getRotation(entity).rotate(Vec3(0, 1, 0));
 
-		addLine(view, pos, pos + dir, Color::BLUE);
-		addLine(view, pos + right, pos + dir + right, Color::BLUE);
-		addLine(view, pos - right, pos + dir - right, Color::BLUE);
-		addLine(view, pos + up, pos + dir + up, Color::BLUE);
-		addLine(view, pos - up, pos + dir - up, Color::BLUE);
+		addLine(view, pos, pos + dir, Lumix::Color::BLUE);
+		addLine(view, pos + right, pos + dir + right, Lumix::Color::BLUE);
+		addLine(view, pos - right, pos + dir - right, Lumix::Color::BLUE);
+		addLine(view, pos + up, pos + dir + up, Lumix::Color::BLUE);
+		addLine(view, pos - up, pos + dir - up, Lumix::Color::BLUE);
 
-		addLine(view, pos + right + up, pos + dir + right + up, Color::BLUE);
-		addLine(view, pos + right - up, pos + dir + right - up, Color::BLUE);
-		addLine(view, pos - right - up, pos + dir - right - up, Color::BLUE);
-		addLine(view, pos - right + up, pos + dir - right + up, Color::BLUE);
+		addLine(view, pos + right + up, pos + dir + right + up, Lumix::Color::BLUE);
+		addLine(view, pos + right - up, pos + dir + right - up, Lumix::Color::BLUE);
+		addLine(view, pos - right - up, pos + dir - right - up, Lumix::Color::BLUE);
+		addLine(view, pos - right + up, pos + dir - right + up, Lumix::Color::BLUE);
 
-		addSphere(view, pos - dir, 0.1f, Color::BLUE);
+		addSphere(view, pos - dir, 0.1f, Lumix::Color::BLUE);
 	}
 
 	void showDecalGizmo(WorldView& view, ComponentUID cmp)
@@ -5358,7 +5360,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 		const Vec3 x = tr.rot * Vec3(1, 0, 0) * decal.half_extents.x;
 		const Vec3 y = tr.rot * Vec3(0, 1, 0) * decal.half_extents.y;
 		const Vec3 z = tr.rot * Vec3(0, 0, 1) * decal.half_extents.z;
-		addCube(view, tr.pos, x, y, z, Color::BLUE);
+		addCube(view, tr.pos, x, y, z, Lumix::Color::BLUE);
 	}
 
 	void showCurveDecalGizmo(WorldView& view, ComponentUID cmp)
@@ -5371,7 +5373,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 		const Vec3 x = tr.rot * Vec3(1, 0, 0) * decal.half_extents.x;
 		const Vec3 y = tr.rot * Vec3(0, 1, 0) * decal.half_extents.y;
 		const Vec3 z = tr.rot * Vec3(0, 0, 1) * decal.half_extents.z;
-		addCube(view, tr.pos, x, y, z, Color::BLUE);
+		addCube(view, tr.pos, x, y, z, Lumix::Color::BLUE);
 
 		Gizmo::Config cfg;
 		const DVec3 pos0 = tr.transform(DVec3(decal.bezier_p0.x, 0, decal.bezier_p0.y));
@@ -5389,15 +5391,15 @@ struct StudioAppPlugin : StudioApp::IPlugin
 			editor.setProperty(CURVE_DECAL_TYPE, "", 0, "Bezier P2", Span(&e, 1), p2);
 		}
 
-		addLine(view, tr.pos, p0_tr.pos, Color::BLUE);
-		addLine(view, tr.pos, p2_tr.pos, Color::GREEN);
+		addLine(view, tr.pos, p0_tr.pos, Lumix::Color::BLUE);
+		addLine(view, tr.pos, p2_tr.pos, Lumix::Color::GREEN);
 	}
 
 	void showCameraGizmo(WorldView& view, ComponentUID cmp)
 	{
 		RenderModule* module = static_cast<RenderModule*>(cmp.module);
 
-		addFrustum(view, module->getCameraFrustum((EntityRef)cmp.entity), Color::BLUE);
+		addFrustum(view, module->getCameraFrustum((EntityRef)cmp.entity), Lumix::Color::BLUE);
 	}
 
 	bool showGizmo(WorldView& view, ComponentUID cmp) override

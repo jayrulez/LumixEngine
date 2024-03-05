@@ -47,3 +47,10 @@ target_link_libraries(animation
     engine
     renderer
 )
+
+if(BUILD_EDITOR)
+  target_link_libraries(animation
+    PUBLIC
+      editor
+  )
+endif()

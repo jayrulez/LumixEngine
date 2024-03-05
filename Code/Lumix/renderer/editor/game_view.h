@@ -4,7 +4,7 @@
 #include "editor/studio_app.h"
 #include "editor/utils.h"
 #include "foundation/allocator.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "renderer/gpu/gpu.h"
 

@@ -197,7 +197,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 		const Vec3 y = tr.rot.rotate(Vec3(0, zone.extents.y, 0));
 		const Vec3 z = tr.rot.rotate(Vec3(0, 0, zone.extents.z));
 
-		addCube(view, tr.pos, z, y, x, Color::BLUE);
+		addCube(view, tr.pos, z, y, x, Lumix::Color::BLUE);
 
 		return true; 
 	}

@@ -456,7 +456,7 @@ struct StudioLuaPlugin : StudioApp::GUIPlugin {
 
 	StudioApp& m_app;
 	Action m_action;
-	String m_name;
+	Lumix::String m_name;
 	i32 m_plugin_ref;
 };
 
@@ -725,7 +725,7 @@ struct AssetPlugin : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		OutputMemoryStream src_data(m_app.getAllocator());
 		if (!fs.getContentSync(src, src_data)) return false;
 		
-		Array<Path> deps(m_app.getAllocator());
+		Lumix::Array<Path> deps(m_app.getAllocator());
 		if (!gatherRequires(src_data, deps, src)) return false;
 
 		OutputMemoryStream out(m_app.getAllocator());

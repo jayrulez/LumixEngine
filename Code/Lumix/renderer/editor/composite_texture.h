@@ -2,7 +2,7 @@
 
 #include "foundation/allocators.h"
 #include "foundation/array.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/path.h"
 #include "editor/studio_app.h"
 #include "editor/utils.h"

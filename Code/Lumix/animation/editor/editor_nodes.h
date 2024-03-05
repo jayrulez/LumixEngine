@@ -1,9 +1,9 @@
 #pragma once
 
 #include "foundation/array.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "animation/animation.h"
 #include "animation/nodes.h"

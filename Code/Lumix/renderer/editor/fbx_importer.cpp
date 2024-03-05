@@ -10,7 +10,7 @@
 #include "foundation/hash.h"
 #include "foundation/job_system.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "engine/prefab.h"

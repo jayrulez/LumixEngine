@@ -3,7 +3,7 @@
 #include "foundation/crt.h"
 #include "engine/engine.h"
 #include "foundation/geometry.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "engine/resource_manager.h"
 #include "engine/world.h"

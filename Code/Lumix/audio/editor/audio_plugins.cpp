@@ -209,7 +209,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 			World& world = audio_module->getWorld();
 			const DVec3 pos = world.getPosition(entity);
 
-			addSphere(view, pos, radius, Color::BLUE);
+			addSphere(view, pos, radius, Lumix::Color::BLUE);
 			return true;
 		}
 		else if (cmp.type == CHORUS_ZONE_TYPE)
@@ -219,7 +219,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 			World& world = audio_module->getWorld();
 			const DVec3 pos = world.getPosition(entity);
 
-			addSphere(view, pos, radius, Color::BLUE);
+			addSphere(view, pos, radius, Lumix::Color::BLUE);
 			return true;
 		}
 

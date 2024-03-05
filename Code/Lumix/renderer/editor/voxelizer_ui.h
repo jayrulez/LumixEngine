@@ -1,7 +1,7 @@
 #pragma once
 
 #define LUMIX_NO_CUSTOM_CRT
-#include "engine/math.h"
+#include "foundation/lmath.h"
 #include "editor/studio_app.h"
 #include "editor/utils.h"
 #include "renderer/voxels.h"

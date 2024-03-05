@@ -52,3 +52,10 @@ target_link_libraries(audio
 	  engine
     dxguid
 )
+
+if(BUILD_EDITOR)
+  target_link_libraries(audio
+    PUBLIC
+      editor
+  )
+endif()

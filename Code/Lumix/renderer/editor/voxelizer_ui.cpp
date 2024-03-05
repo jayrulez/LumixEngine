@@ -3,7 +3,7 @@
 #include "editor/settings.h"
 #include "editor/world_editor.h"
 #include "engine/engine.h"
-#include "engine/profiler.h"
+#include "foundation/profiler.h"
 #include "engine/resource_manager.h"
 #include "engine/world.h"
 #include "renderer/model.h"

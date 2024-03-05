@@ -4,11 +4,11 @@
 #include "foundation/array.h"
 #include "foundation/geometry.h"
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "openfbx/ofbx.h"
 
 namespace Lumix {

@@ -11,7 +11,7 @@
 #include "foundation/file_system.h"
 #include "foundation/log.h"
 #include "foundation/os.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include "renderer/material.h"
 #include "renderer/particle_system.h"

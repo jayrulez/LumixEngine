@@ -77,12 +77,45 @@ if(BUILD_EDITOR)
     ${CMAKE_CURRENT_LIST_DIR}/editor/stb.cpp
     ${CMAKE_CURRENT_LIST_DIR}/editor/terrain_editor.cpp
     ${CMAKE_CURRENT_LIST_DIR}/editor/terrain_editor.h
-    ${CMAKE_CURRENT_LIST_DIR}/editor/voxelizer_ui.cpp
-    ${CMAKE_CURRENT_LIST_DIR}/editor/voxelizer_ui.h
+#    ${CMAKE_CURRENT_LIST_DIR}/editor/voxelizer_ui.cpp
+#    ${CMAKE_CURRENT_LIST_DIR}/editor/voxelizer_ui.h
     ${CMAKE_CURRENT_LIST_DIR}/editor/world_viewer.cpp
     ${CMAKE_CURRENT_LIST_DIR}/editor/world_viewer.h
 
+
+    ${WELDER_ROOT_DIR}/external/meshoptimizer/allocator.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/clusterizer.cpp
+    ${WELDER_ROOT_DIR}/external/meshoptimizer/indexcodec.cpp
+    ${WELDER_ROOT_DIR}/external/meshoptimizer/indexgenerator.cpp
+    ${WELDER_ROOT_DIR}/external/meshoptimizer/meshoptimizer.h
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/overdrawanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/overdrawoptimizer.cpp
+    ${WELDER_ROOT_DIR}/external/meshoptimizer/simplifier.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/spatialorder.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/stripifier.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vcacheanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vcacheoptimizer.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vertexcodec.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vertexfilter.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vfetchanalyzer.cpp
+#    ${WELDER_ROOT_DIR}/external/meshoptimizer/vfetchoptimizer.cpp
+
+    ${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.h
+    ${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c
+    
+    ${WELDER_ROOT_DIR}/external/openfbx/libdeflate.h
+    ${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c
+    ${WELDER_ROOT_DIR}/external/openfbx/ofbx.h
+    ${WELDER_ROOT_DIR}/external/openfbx/ofbx.cpp
+
   )
+
+  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c)
+  set_source_files_properties(${WELDER_ROOT_DIR}/external/mikktspace/mikktspace.c PROPERTIES LANGUAGE CXX)
+  
+
+  welder_source_ignore_precompiled_header(${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c)
+  set_source_files_properties(${WELDER_ROOT_DIR}/external/openfbx/libdeflate.c PROPERTIES LANGUAGE CXX)
 endif()
 
 target_sources(renderer
@@ -109,6 +142,13 @@ target_link_libraries(renderer
 	  engine
     lua_script
 )
+
+if(BUILD_EDITOR)
+  target_link_libraries(renderer
+    PUBLIC
+      editor
+  )
+endif()
 
 target_include_directories(renderer
   PUBLIC

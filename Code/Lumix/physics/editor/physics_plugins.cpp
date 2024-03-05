@@ -18,7 +18,7 @@
 #include "engine/engine.h"
 #include "foundation/geometry.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"
@@ -63,9 +63,9 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 	const DVec3 joint_pos = global_frame0.pos;
 	const Quat rot0 = global_frame0.rot;
 
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(1, 0, 0), Color::RED);
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 1, 0), Color::GREEN);
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 0, 1), Color::BLUE);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(1, 0, 0), Lumix::Color::RED);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 1, 0), Lumix::Color::GREEN);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 0, 1), Lumix::Color::BLUE);
 
 	RigidTransform global_frame1 = global_frame0;
 	if (actors[1]) {
@@ -73,9 +73,9 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 		const RigidTransform f = fromPhysx(actors[1]->getGlobalPose() * local_frame1);
 		const Quat rot1 = f.rot;
 
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(1, 0, 0), Color::RED);
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 1, 0), Color::GREEN);
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 0, 1), Color::BLUE);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(1, 0, 0), Lumix::Color::RED);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 1, 0), Lumix::Color::GREEN);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 0, 1), Lumix::Color::BLUE);
 	}
 	const bool is_swing1_limited = joint->getMotion(physx::PxD6Axis::eSWING1) == physx::PxD6Motion::eLIMITED;
 	const bool is_swing2_limited = joint->getMotion(physx::PxD6Axis::eSWING2) == physx::PxD6Motion::eLIMITED;
@@ -87,8 +87,7 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 		addCone(view, joint_pos,
 			rot1 * Vec3(1, 0, 0),
 			rot1 * Vec3(0, 1, 0) * tanf(swing1),
-			rot1 * Vec3(0, 0, 1) * tanf(swing2),
-			Color(0x55, 0x55, 0x55, 0xff));
+			rot1 * Vec3(0, 0, 1) * tanf(swing2), Lumix::Color(0x55, 0x55, 0x55, 0xff));
 	}
 	else if (is_swing1_limited)
 	{
@@ -96,17 +95,17 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 		const Vec3 z_vec = rot1 * Vec3(0, 0, 1);
 		float swing1 = joint->getSwingLimit().yAngle;
 		DVec3 prev_pos = joint_pos + z_vec * sinf(-swing1) + x_vec * cosf(-swing1);
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 		for (int i = 1; i <= 32; ++i)
 		{
 			float angle = -swing1 + (2*swing1) * i / 32.0f;
 			float s = sinf(angle);
 			float c = cosf(angle);
 			DVec3 pos = joint_pos + z_vec * s + x_vec * c;
-			addLine(view, pos, prev_pos, Color(0x55, 0x55, 0x55, 0xff));
+			addLine(view, pos, prev_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 			prev_pos = pos;
 		}
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 	}
 	else if (is_swing2_limited)
 	{
@@ -114,17 +113,17 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 		Vec3 x_vec = rot1 * Vec3(1, 0, 0);
 		float swing2 = joint->getSwingLimit().zAngle;
 		DVec3 prev_pos = joint_pos + y_vec * sinf(-swing2) + x_vec * cosf(-swing2);
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 		for (int i = 1; i <= 32; ++i)
 		{
 			float angle = -swing2 + (2 * swing2) * i / 32.0f;
 			float s = sinf(angle);
 			float c = cosf(angle);
 			DVec3 pos = joint_pos + y_vec * s + x_vec * c;
-			addLine(view, pos, prev_pos, Color(0x55, 0x55, 0x55, 0xff));
+			addLine(view, pos, prev_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 			prev_pos = pos;
 		}
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 	}
 
 	bool is_twist_limited = joint->getMotion(physx::PxD6Axis::eTWIST) == physx::PxD6Motion::eLIMITED;
@@ -135,17 +134,17 @@ void showD6JointGizmo(WorldView& view, const RigidTransform& global_frame, physx
 		float lower = joint->getTwistLimit().lower;
 		float upper = joint->getTwistLimit().upper;
 		DVec3 prev_pos = joint_pos + y_vec * sinf(lower) + z_vec * cosf(lower);
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 		for (int i = 1; i <= 32; ++i)
 		{
 			float angle = lower + (upper - lower) * i / 32.0f;
 			float s = sinf(angle);
 			float c = cosf(angle);
 			DVec3 pos = joint_pos + y_vec * s + z_vec * c;
-			addLine(view, pos, prev_pos, Color(0x55, 0x55, 0x55, 0xff));
+			addLine(view, pos, prev_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 			prev_pos = pos;
 		}
-		addLine(view, prev_pos, joint_pos, Color(0x55, 0x55, 0x55, 0xff));
+		addLine(view, prev_pos, joint_pos, Lumix::Color(0x55, 0x55, 0x55, 0xff));
 	}
 }
 
@@ -164,9 +163,9 @@ void showSphericalJointGizmo(WorldView& view, ComponentUID cmp)
 	const DVec3 joint_pos = global_frame0.pos;
 	const Quat rot0 = global_frame0.rot;
 
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(1, 0, 0), Color::RED);
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 1, 0), Color::GREEN);
-	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 0, 1), Color::BLUE);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(1, 0, 0), Lumix::Color::RED);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 1, 0), Lumix::Color::GREEN);
+	addLine(view, joint_pos, joint_pos + rot0 * Vec3(0, 0, 1), Lumix::Color::BLUE);
 
 	RigidTransform local_frame1 = phy_module->getJointConnectedBodyLocalFrame(entity);
 	RigidTransform global_frame1 = world.getTransform((EntityRef)other_entity).getRigidPart() * local_frame1;
@@ -177,18 +176,17 @@ void showSphericalJointGizmo(WorldView& view, ComponentUID cmp)
 	{
 		Vec2 limit = phy_module->getSphericalJointLimit(entity);
 		DVec3 other_pos = world.getPosition((EntityRef)other_entity);
-		addLine(view, joint_pos, other_pos, Color::RED);
+		addLine(view, joint_pos, other_pos, Lumix::Color::RED);
 		addCone(view, joint_pos,
 			rot1 * Vec3(1, 0, 0),
 			rot1 * Vec3(0, 1, 0) * tanf(limit.y),
-			rot1 * Vec3(0, 0, 1) * tanf(limit.x),
-			Color(0xff555555));
+			rot1 * Vec3(0, 0, 1) * tanf(limit.x), Lumix::Color(0xff555555));
 	}
 	else
 	{
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(1, 0, 0), Color::RED);
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 1, 0), Color::GREEN);
-		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 0, 1), Color::BLUE);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(1, 0, 0), Lumix::Color::RED);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 1, 0), Lumix::Color::GREEN);
+		addLine(view, joint_pos, joint_pos + rot1 * Vec3(0, 0, 1), Lumix::Color::BLUE);
 	}
 }
 
@@ -209,14 +207,13 @@ void showRigidActorGizmo(WorldView& view, ComponentUID cmp)
 			, pos + rot.rotate(p)
 			, r.rotate(Vec3(half.x, 0, 0))
 			, r.rotate(Vec3(0, half.y, 0))
-			, r.rotate(Vec3(0, 0, half.z))
-			, Color::BLUE);
+			, r.rotate(Vec3(0, 0, half.z)), Lumix::Color::BLUE);
 	}
 	const i32 sphere_count = module->getSphereGeometryCount(e);
 	for (i32 i = 0; i < sphere_count; ++i) {
 		const float r = module->getSphereGeomRadius(e, i);
 		const Vec3 p = module->getSphereGeomOffsetPosition(e, i);
-		addSphere(view, pos + rot.rotate(p), r, Color::BLUE);
+		addSphere(view, pos + rot.rotate(p), r, Lumix::Color::BLUE);
 	}
 }
 
@@ -229,7 +226,7 @@ void showWheelGizmo(WorldView& view, ComponentUID cmp) {
 	const float width = module->getWheelWidth(e);
 
 	const Vec3 wheel_axis = wheel_tr.rot.rotate(Vec3(1, 0, 0));
-	addCylinder(view, wheel_tr.pos - wheel_axis * width * 0.5f, wheel_axis , radius, width, Color::BLUE);
+	addCylinder(view, wheel_tr.pos - wheel_axis * width * 0.5f, wheel_axis, radius, width, Lumix::Color::BLUE);
 }
 
 void showVehicleGizmo(WorldView& view, ComponentUID cmp) {
@@ -247,10 +244,10 @@ void showVehicleGizmo(WorldView& view, ComponentUID cmp) {
 		showWheelGizmo(view, wheel_cmp);
 
 		const Transform wheel_tr = world.getTransform(ch);
-		addLine(view, vehicle_tr.pos, wheel_tr.pos, Color::BLUE);
+		addLine(view, vehicle_tr.pos, wheel_tr.pos, Lumix::Color::BLUE);
 
 		const Vec3 cm = module->getVehicleCenterOfMass(e);
-		addLine(view, vehicle_tr.pos, vehicle_tr.pos + vehicle_tr.rot.rotate(cm), Color::RED);
+		addLine(view, vehicle_tr.pos, vehicle_tr.pos + vehicle_tr.rot.rotate(cm), Lumix::Color::RED);
 	}
 }
 
@@ -422,7 +419,7 @@ struct PhysicsUIPlugin final : StudioApp::GUIPlugin
 		}
 		else {
 			ASSERT(m_simulated_entities.empty());
-			const Array<EntityRef>& selected =  editor.getSelectedEntities();
+			const Lumix::Array<EntityRef>& selected = editor.getSelectedEntities();
 			for (EntityRef e : selected) {
 				if (!world->hasComponent(e, RIGID_ACTOR_TYPE)) continue;
 				SimulatedEntity& se = m_simulated_entities.emplace();
@@ -723,7 +720,7 @@ struct PhysicsUIPlugin final : StudioApp::GUIPlugin
 		ASSERT(render_module);
 		Model* model = render_module->getModelInstanceModel(entity);
 		ASSERT(model && model->isReady());
-		Array<EntityRef> entities(m_app.getAllocator());
+		Lumix::Array<EntityRef> entities(m_app.getAllocator());
 		for (int i = 0; i < model->getBoneCount(); ++i) {
 			const Model::Bone& bone = model->getBone(i);
 
@@ -825,8 +822,8 @@ struct PhysicsUIPlugin final : StudioApp::GUIPlugin
 	Action m_toggle_ui;
 	Action m_simulate_selected;
 	bool m_is_simulating_selected = false;
-	Array<SimulatedEntity> m_simulated_entities;
-	Array<EntityRef> m_reset_dynamic_entities;
+	Lumix::Array<SimulatedEntity> m_simulated_entities;
+	Lumix::Array<EntityRef> m_reset_dynamic_entities;
 };
 
 
@@ -984,7 +981,7 @@ struct StudioAppPlugin : StudioApp::IPlugin
 			float radius = phy_module->getControllerRadius(entity);
 
 			const DVec3 pos = world.getPosition(entity);
-			addCapsule(view, pos, height, radius, Color::BLUE);
+			addCapsule(view, pos, height, radius, Lumix::Color::BLUE);
 			return true;
 		}
 

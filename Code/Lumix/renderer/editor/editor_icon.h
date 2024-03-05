@@ -3,7 +3,7 @@
 #include "engine/lumix.h"
 
 #include "foundation/hash_map.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 
 
 namespace Lumix

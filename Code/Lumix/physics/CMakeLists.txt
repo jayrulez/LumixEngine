@@ -59,6 +59,13 @@ target_link_libraries(physics
 		SimulationController_static_64
 )
 
+if(BUILD_EDITOR)
+  target_link_libraries(physics
+    PUBLIC
+      editor
+  )
+endif()
+
 target_include_directories(physics
   PUBLIC
   ${WELDER_ROOT_DIR}/external/physx/include
