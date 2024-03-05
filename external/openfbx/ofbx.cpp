@@ -17,6 +17,8 @@
 #endif
 #include <map>
 
+#undef Error
+
 namespace ofbx
 {
 
