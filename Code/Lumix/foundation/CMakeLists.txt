@@ -96,3 +96,8 @@ target_link_libraries(foundation
     SpatialPartition
     Zilch
 )
+
+#set_property(TARGET foundation PROPERTY
+#  MSVC_RUNTIME_LIBRARY "MultiThreaded$<$<CONFIG:Debug>:Debug>"
+#  MSVC_RUNTIME_LIBRARY "MultiThreadedDLL"
+#)

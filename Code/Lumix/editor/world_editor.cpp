@@ -14,7 +14,7 @@
 #include "foundation/hash.h"
 #include "engine/plugin.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/metaprogramming.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
@@ -23,7 +23,7 @@
 #include "engine/resource.h"
 #include "engine/resource_manager.h"
 #include "foundation/stream.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "engine/world.h"
 #include "render_interface.h"
 

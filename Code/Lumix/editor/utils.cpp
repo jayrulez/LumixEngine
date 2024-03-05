@@ -3,7 +3,7 @@
 
 #include "foundation/file_system.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"

@@ -49,14 +49,14 @@ set(engine_src ${engine_src}
 
   ${WELDER_ROOT_DIR}/external/imgui/IconsFontAwesome5.h
   ${WELDER_ROOT_DIR}/external/imgui/imconfig.h
-  ${WELDER_ROOT_DIR}/external/imgui/imgui.cpp
+#  ${WELDER_ROOT_DIR}/external/imgui/imgui.cpp
   ${WELDER_ROOT_DIR}/external/imgui/imgui.h
 #  ${WELDER_ROOT_DIR}/external/imgui/imgui_demo.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_draw.cpp
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_freetype.cpp
+#  ${WELDER_ROOT_DIR}/external/imgui/imgui_draw.cpp
+#  ${WELDER_ROOT_DIR}/external/imgui/imgui_freetype.cpp
   ${WELDER_ROOT_DIR}/external/imgui/imgui_freetype.h
   ${WELDER_ROOT_DIR}/external/imgui/imgui_internal.h
-  ${WELDER_ROOT_DIR}/external/imgui/imgui_tables.cpp
+#  ${WELDER_ROOT_DIR}/external/imgui/imgui_tables.cpp
   ${WELDER_ROOT_DIR}/external/imgui/imgui_unity.cpp
   ${WELDER_ROOT_DIR}/external/imgui/imgui_user.h
   ${WELDER_ROOT_DIR}/external/imgui/imgui_user.inl

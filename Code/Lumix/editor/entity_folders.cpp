@@ -1,4 +1,4 @@
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/stream.h"
 
 #include "entity_folders.h"

@@ -6,7 +6,7 @@
 #include "foundation/os.h"
 #include "foundation/path.h"
 #include "foundation/profiler.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "asset_browser.h"
 #include "editor/asset_compiler.h"

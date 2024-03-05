@@ -3,7 +3,7 @@
 #include "engine/lumix.h"
 
 #include "foundation/delegate.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/stream.h"
 
 #include <imgui/imgui.h>

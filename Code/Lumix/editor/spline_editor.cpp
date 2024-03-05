@@ -1,5 +1,5 @@
 #include "foundation/geometry.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "editor/asset_compiler.h"
 #include "editor/gizmo.h"

@@ -3,9 +3,9 @@
 #include "foundation/hash.h"
 #include "foundation/hash_map.h"
 #include "foundation/log.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/os.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "prefab_system.h"
 #include "editor/asset_browser.h"

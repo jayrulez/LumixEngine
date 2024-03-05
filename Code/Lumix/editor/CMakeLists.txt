@@ -51,12 +51,17 @@ endif()
 
 target_sources(editor
   PRIVATE
-#    ${editor_src}
+    ${editor_src}
     ${CMAKE_CURRENT_LIST_DIR}/EditorStandard.cpp
     ${CMAKE_CURRENT_LIST_DIR}/EditorStandard.hpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.cpp
     ${CMAKE_CURRENT_LIST_DIR}/Precompiled.hpp
 
+)
+
+target_link_directories(editor
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external/luau/lib/win
 )
 
 target_link_libraries(editor
@@ -65,4 +70,11 @@ target_link_libraries(editor
     Zilch
     foundation
 	  engine
+    winmm
+    Luau
+)
+
+target_include_directories(editor
+  PUBLIC
+  ${WELDER_ROOT_DIR}/external
 )

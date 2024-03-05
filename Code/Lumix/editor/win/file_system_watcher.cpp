@@ -2,7 +2,7 @@
 #include "foundation/crt.h"
 #include "foundation/delegate.h"
 #include "foundation/profiler.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 #include "foundation/thread.h"
 
 #include "foundation/win/simple_win.h"

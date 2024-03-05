@@ -4,7 +4,7 @@
 #include "foundation/array.h"
 #include "foundation/log.h"
 #include "foundation/sync.h"
-#include "foundation/string.h"
+#include "foundation/lstring.h"
 
 #include "editor/studio_app.h"
 #include "editor/utils.h"

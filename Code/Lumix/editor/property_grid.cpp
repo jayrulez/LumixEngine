@@ -1,9 +1,9 @@
 #include <imgui/imgui.h>
 
 #include "foundation/crt.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 #include "foundation/stream.h"
-#include "foundation/math.h"
+#include "foundation/lmath.h"
 
 #include "property_grid.h"
 #include "asset_browser.h"
