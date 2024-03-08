@@ -3,6 +3,7 @@
 #include "engine/lumix.h"
 
 #include "core/hash.h"
+#include "core/path.h"
 #include "editor/studio_app.h"
 
 namespace Lumix {

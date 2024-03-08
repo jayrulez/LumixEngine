@@ -72,9 +72,6 @@ private:
 	u32 hash = 0;
 };
 
-using FilePathHash = StableHash;
-using BoneNameHash = StableHash;
-
 struct LUMIX_CORE_API RollingStableHasher {
 	void begin();
 	void update(const void* data, u32 len);

@@ -6,6 +6,7 @@
 #include "core/math.h"
 #include "core/string.h"
 #include "engine/resource.h"
+#include "renderer/model.h"
 
 namespace Lumix
 {

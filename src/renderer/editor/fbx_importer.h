@@ -10,6 +10,7 @@
 #include "core/stream.h"
 #include "core/string.h"
 #include "openfbx/ofbx.h"
+#include "renderer/model.h"
 
 namespace Lumix {
 

@@ -20,6 +20,8 @@ struct lua_State;
 
 namespace Lumix {
 
+using BoneNameHash = StableHash;
+
 struct Material;
 struct Mesh;
 struct Model;

@@ -6,6 +6,8 @@
 
 
 namespace Lumix {
+	
+using FilePathHash = StableHash;
 
 struct StringView;
 
