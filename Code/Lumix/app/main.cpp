@@ -31,6 +31,9 @@
 
 using namespace Lumix;
 
+unsigned char VirtualFileSystemData[] = {0};
+unsigned int VirtualFileSystemSize = 1;
+
 static const ComponentType ENVIRONMENT_TYPE = reflection::getComponentType("environment");
 static const ComponentType LUA_SCRIPT_TYPE = reflection::getComponentType("lua_script");
 

@@ -3,6 +3,9 @@
 #include "editor/asset_compiler.hpp"
 #include "editor/studio_app.hpp"
 #include "editor/world_editor.hpp"
+#include "mikktspace/mikktspace.h"
+#include "meshoptimizer/meshoptimizer.h"
+
 #include "core/atomic.hpp"
 #include "core/crt.hpp"
 #include "engine/engine.hpp"
@@ -17,8 +20,6 @@
 #include "core/profiler.hpp"
 #include "engine/resource_manager.hpp"
 #include "engine/world.hpp"
-#include "meshoptimizer/meshoptimizer.h"
-#include "mikktspace/mikktspace.h"
 #include "physics/physics_resources.hpp"
 #include "physics/physics_module.hpp"
 #include "physics/physics_system.hpp"

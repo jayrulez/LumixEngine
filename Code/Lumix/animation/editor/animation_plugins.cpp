@@ -41,6 +41,7 @@ static const ComponentType ENVIRONMENT_TYPE = reflection::getComponentType("envi
 
 namespace {
 	
+using Lumix::Array;
 
 struct AnimationAssetBrowserPlugin : AssetBrowser::IPlugin {
 	struct EditorWindow : AssetEditorWindow, SimpleUndoRedo {

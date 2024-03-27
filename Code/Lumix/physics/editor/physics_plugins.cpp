@@ -36,6 +36,7 @@ using namespace Lumix;
 namespace
 {
 
+using Lumix::Array;
 
 const ComponentType MODEL_INSTANCE_TYPE = reflection::getComponentType("model_instance");
 const ComponentType BONE_ATTACHMENT_TYPE = reflection::getComponentType("bone_attachment");

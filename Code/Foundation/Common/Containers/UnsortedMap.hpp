@@ -3,7 +3,7 @@
 
 #include "ContainerCommon.hpp"
 #include "Memory/Allocator.hpp"
-#include "Array.hpp"
+#include "Containers/Array.hpp"
 #include "Utility/Hashing.hpp"
 
 namespace Zero

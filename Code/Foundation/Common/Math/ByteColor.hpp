@@ -223,7 +223,7 @@ const ByteColor Gray3 = ByteColorRGBA(71, 71, 71, 255);
 const ByteColor TextBlack = ByteColorRGBA(0, 0, 0, 128);
 } // namespace EditorColor
 
-namespace Color
+namespace Zero::Color
 {
 #define DefineColor(name, r, g, b, a) const ByteColor name = ByteColorRGBA(r, g, b, a);
 #include "ColorDefinitions.hpp"

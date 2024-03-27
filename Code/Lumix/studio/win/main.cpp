@@ -2,6 +2,9 @@
 #include "core/win/simple_win.hpp"
 #include "editor/studio_app.hpp"
 
+unsigned char VirtualFileSystemData[] = {0};
+unsigned int VirtualFileSystemSize = 1;
+
 int main(int argc, char* argv[])
 {
 	SetProcessDPIAware();

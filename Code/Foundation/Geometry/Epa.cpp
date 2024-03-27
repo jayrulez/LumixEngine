@@ -3,6 +3,7 @@
 
 namespace Intersection
 {
+using namespace Zero;
 
 void Epa::Init(const Simplex& simplex)
 {

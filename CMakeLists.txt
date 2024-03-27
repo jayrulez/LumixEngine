@@ -9,9 +9,11 @@ endif ()
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(BUILD_EDITOR "If set to 'ON', Editor will be built." ON)
+
 set(CMAKE_CONFIGURATION_TYPES Debug RelWithDebInfo Release MinSizeRel)
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG")
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ZeroEditor)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -DDEBUG -DLUMIX_DEBUG -DNDEBUG")
+set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT app)
 
 find_program(ZERO_IWYU_PATH NAMES include-what-you-use iwyu)
 if(ZERO_IWYU_PATH)
@@ -58,8 +60,6 @@ set(ZERO_CMAKE_DIR ${ZERO_ROOT_DIR}/CMakeFiles/)
 set(ZERO_TOOLCHAIN_DIR ${ZERO_CMAKE_DIR}/Toolchain/)
 set(ZERO_TARGETOS_DIR ${ZERO_CMAKE_DIR}/TargetOs/)
 set(ZERO_PLATFORM_DATA_DIR ${ZERO_ROOT_DIR}/PlatformData/${ZERO_TOOLCHAIN})
-set(ZERO_ZILCH_CUSTOM_PLUGIN_SHARED_DIR ${ZERO_ROOT_DIR}/Data/ZilchCustomPluginShared/)
-set(ZERO_ALL_TO_ONE_TOOL ${ZERO_ROOT_DIR}/Tools/${ZERO_PLATFORM}/ZilchToOneCpp)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -172,4 +172,13 @@ set(CMAKE_EXE_LINKER_FLAGS_MINSIZEREL         "${CMAKE_EXE_LINKER_FLAGS_MINSIZER
 #Stub
 #add_subdirectory(Libraries/Platform/${ZERO_PLATFORM})
 
+set(CMAKE_MSVC_RUNTIME_LIBRARY "MultiThreadedDLL")
+
+add_definitions(-DSTATIC_PLUGINS)
+
+add_subdirectory(External)
 add_subdirectory(Code)
+
+# todo: copy dll deps to projects
+#set_target_properties(app PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")
+#set_target_properties(studio PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")

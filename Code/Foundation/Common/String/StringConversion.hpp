@@ -2,7 +2,7 @@
 #pragma once
 #include "Utility/Typedefs.hpp"
 #include "FixedString.hpp"
-#include "String.hpp"
+#include "String/String.hpp"
 
 namespace Zero
 {

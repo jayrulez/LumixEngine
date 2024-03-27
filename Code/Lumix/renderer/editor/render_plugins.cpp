@@ -71,6 +71,12 @@ using namespace Lumix;
 
 namespace {
 
+using Lumix::Array;
+using Lumix::HashMap;
+using Lumix::swap;
+
+#undef has
+
 static const ComponentType PARTICLE_EMITTER_TYPE = reflection::getComponentType("particle_emitter");
 static const ComponentType TERRAIN_TYPE = reflection::getComponentType("terrain");
 static const ComponentType CAMERA_TYPE = reflection::getComponentType("camera");

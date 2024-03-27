@@ -10,8 +10,8 @@ const Vec3 cWorldPlaneNormal = Vec3(real(0.0), real(0.0), real(1.0));
 const real cWorldPlaneOffset = real(0.0);
 const real cPointRadius = real(0.075);
 const uint cInvalidPointId = uint(-1);
-const ByteColor cDefaultPointColor = Color::White;
-const ByteColor cSelectedPointColor = Color::Red;
+const ByteColor cDefaultPointColor = Zero::Color::White;
+const ByteColor cSelectedPointColor = Zero::Color::Red;
 
 bool LessThanX(Vec2Param left, Vec2Param right)
 {

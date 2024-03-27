@@ -1,7 +1,7 @@
 // MIT Licensed (see LICENSE.md).
 #include "Precompiled.hpp"
 
-using Zero::String;
+//using Zero::String;
 
 namespace Math
 {
@@ -74,7 +74,7 @@ int Random::IntRangeInIn(int min, int max)
 {
   if (min > max)
   {
-    String msg = String::Format("The min value '%d' must be less than or equal to the max value '%d'", min, max);
+	  Zero::String msg = Zero::String::Format("The min value '%d' must be less than or equal to the max value '%d'", min, max);
     // DoNotifyException("Invalid range", msg);
     return min;
   }
@@ -88,7 +88,7 @@ int Random::IntRangeInEx(int min, int max)
 {
   if (min >= max)
   {
-    String msg = String::Format("The min value '%d' must be less than the max value '%d'", min, max);
+	Zero::String msg = Zero::String::Format("The min value '%d' must be less than the max value '%d'", min, max);
     // DoNotifyException("Invalid range", msg);
     return min;
   }
@@ -102,7 +102,7 @@ int Random::IntVariance(int base, int variance)
 {
   if (variance < 0)
   {
-    String msg = String::Format("The variance value '%d' cannot be negative.", variance);
+	Zero::String msg = Zero::String::Format("The variance value '%d' cannot be negative.", variance);
     // DoNotifyException("Invalid variance", msg);
     return base;
   }

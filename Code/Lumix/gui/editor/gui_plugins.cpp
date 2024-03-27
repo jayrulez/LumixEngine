@@ -32,6 +32,8 @@ using namespace Lumix;
 
 namespace {
 
+using Lumix::Array;
+
 static const ComponentType GUI_RECT_TYPE = reflection::getComponentType("gui_rect");
 static const ComponentType GUI_IMAGE_TYPE = reflection::getComponentType("gui_image");
 static const ComponentType GUI_TEXT_TYPE = reflection::getComponentType("gui_text");

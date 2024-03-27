@@ -42,6 +42,9 @@ static const ComponentType LUA_SCRIPT_TYPE = reflection::getComponentType("lua_s
 
 namespace {
 
+using Lumix::String;
+using Lumix::Array;
+
 #ifdef LUMIX_LUAU_ANALYSIS
 struct LuauAnalysis :Luau::FileResolver {
 	struct Location {

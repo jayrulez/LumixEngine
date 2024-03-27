@@ -4,7 +4,7 @@
 // Includes
 #include "ContainerCommon.hpp"
 #include "Algorithm.hpp"
-#include "Array.hpp"
+#include "Containers/Array.hpp"
 
 namespace Zero
 {

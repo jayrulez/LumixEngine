@@ -3,6 +3,7 @@
 
 namespace Intersection
 {
+using namespace Zero;
 
 const float Gjk::sEpsilon = 0.00001f;
 

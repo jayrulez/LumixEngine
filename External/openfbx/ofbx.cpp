@@ -88,6 +88,7 @@ struct Video
 };
 
 
+#undef Error
 struct Error
 {
 	Error() {}
