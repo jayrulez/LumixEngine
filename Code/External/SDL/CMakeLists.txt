@@ -1,0 +1,19 @@
+set(SDL_SHARED_ENABLED_BY_DEFAULT OFF)
+set(SDL_TEST_ENABLED_BY_DEFAULT OFF)
+set(SDL_TESTS OFF)
+set(SDL_TEST OFF)
+
+# Only done as a hack because we can't find main for some reason (Ubuntu).
+if(ZERO_TARGETOS STREQUAL "Linux")
+  add_definitions(-DSDL_MAIN_AVAILABLE)
+endif()
+
+add_subdirectory(Repo)
+
+add_library(SDL INTERFACE)
+
+target_link_libraries(SDL
+  INTERFACE
+    SDL2-static
+    SDL2main
+)

@@ -1,3 +1,5 @@
+.vs/
+.vscode/
 tmp/
 bin/
 obj/
@@ -20,3 +22,8 @@ src/engine/plugins.inl
 data/.shader_cache_dx11
 projects/itch_io/
 !data/editor/scripts/plugins/
+Temp/
+Build/
+node_modules/
+enc_temp_folder/
+package-lock.json
