@@ -49,3 +49,17 @@ target_link_libraries(studio
     GL
     freetype
 )
+
+zero_copy_from_linked_libraries(studio)
+
+if(${ZERO_PLATFORM} STREQUAL "Windows")
+
+	add_custom_command(TARGET studio POST_BUILD COMMAND
+	  ${CMAKE_COMMAND} -E copy ${ZERO_ROOT_DIR}/External/dbghelp/dbgcore.dll $<TARGET_FILE_DIR:studio>)
+
+	add_custom_command(TARGET studio POST_BUILD COMMAND
+	  ${CMAKE_COMMAND} -E copy ${ZERO_ROOT_DIR}/External/dbghelp/dbghelp.dll $<TARGET_FILE_DIR:studio>)
+
+	set_target_properties(studio PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${ZERO_DATA_DIR}")
+
+endif()

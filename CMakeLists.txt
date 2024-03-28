@@ -59,7 +59,7 @@ set(ZERO_CODE_DIR ${ZERO_ROOT_DIR}/Code/)
 set(ZERO_CMAKE_DIR ${ZERO_ROOT_DIR}/CMakeFiles/)
 set(ZERO_TOOLCHAIN_DIR ${ZERO_CMAKE_DIR}/Toolchain/)
 set(ZERO_TARGETOS_DIR ${ZERO_CMAKE_DIR}/TargetOs/)
-set(ZERO_PLATFORM_DATA_DIR ${ZERO_ROOT_DIR}/PlatformData/${ZERO_TOOLCHAIN})
+set(ZERO_DATA_DIR ${ZERO_ROOT_DIR}/Data/)
 
 set_property(GLOBAL PROPERTY USE_FOLDERS ON)
 
@@ -104,6 +104,17 @@ function(zero_copy_from_linked_libraries target)
   zero_get_all_dependencies(dependencies ${target})
   foreach(dependency ${dependencies})
     set(directory "${${dependency}CopyDirectories}")
+    get_target_property(dependency_dll ${dependency} IMPORTED_LOCATION)
+    if(dependency_dll)
+      add_custom_command(TARGET ${target} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E copy ${dependency_dll} $<TARGET_FILE_DIR:${target}>)
+    endif()
+
+    get_target_property(dependency_lib ${dependency} IMPORTED_IMPLIB)
+    if(dependency_lib)
+      add_custom_command(TARGET ${target} POST_BUILD COMMAND
+        ${CMAKE_COMMAND} -E copy ${dependency_lib} $<TARGET_FILE_DIR:${target}>)
+    endif()
     if(directory)
       add_custom_command(TARGET ${target} POST_BUILD COMMAND
         ${CMAKE_COMMAND} -E copy_directory ${directory} $<TARGET_FILE_DIR:${target}>)
@@ -180,5 +191,3 @@ add_subdirectory(External)
 add_subdirectory(Code)
 
 # todo: copy dll deps to projects
-#set_target_properties(app PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")
-#set_target_properties(studio PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${WELDER_DATA_DIR}")

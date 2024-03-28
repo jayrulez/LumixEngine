@@ -3,6 +3,24 @@ add_library(engine)
 zero_setup_library(engine ${CMAKE_CURRENT_LIST_DIR} TRUE)
 zero_use_precompiled_header(engine ${CMAKE_CURRENT_LIST_DIR})
 
+set(LUAU_LIB_DIR ${ZERO_ROOT_DIR}/External/luau/lib/win)
+set(LUAU_INC_DIR ${ZERO_ROOT_DIR}/External/luau/include)
+
+add_library(Lumix::Luau SHARED IMPORTED GLOBAL)
+set_target_properties(Lumix::Luau PROPERTIES IMPORTED_LOCATION "${LUAU_LIB_DIR}/Luau.dll")
+set_target_properties(Lumix::Luau PROPERTIES IMPORTED_IMPLIB "${LUAU_LIB_DIR}/Luau.lib")
+set_target_properties(Lumix::Luau PROPERTIES INTERFACE_INCLUDE_DIRECTORIES "${LUAU_INC_DIR}")
+
+function(zero_link_target_luau TARGET_NAME)
+
+    target_link_libraries(${TARGET_NAME} PRIVATE Lumix::Luau)
+
+    add_custom_command(TARGET ${TARGET_NAME} POST_BUILD
+        COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Lumix::Luau> $<TARGET_FILE_DIR:${TARGET_NAME}>
+    )
+
+endfunction()
+
 set(engine_src
     ${CMAKE_CURRENT_LIST_DIR}/controller_device.hpp
     ${CMAKE_CURRENT_LIST_DIR}/core.cpp
@@ -97,8 +115,10 @@ target_link_libraries(engine
     SpatialPartition
     Zilch
     core
-    Luau
+    Lumix::Luau
 )
+
+zero_link_target_luau(engine)
 
 target_include_directories(engine
   PUBLIC

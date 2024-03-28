@@ -38,3 +38,9 @@ target_link_libraries(app
 )
 
 zero_copy_from_linked_libraries(app)
+
+if(${ZERO_PLATFORM} STREQUAL "Windows")
+
+	set_target_properties(app PROPERTIES VS_DEBUGGER_WORKING_DIRECTORY "${ZERO_DATA_DIR}")
+
+endif()
