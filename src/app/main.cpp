@@ -7,6 +7,7 @@
 #include "engine/file_system.h"
 #include "core/geometry.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/os.h"
 #include "core/path.h"
@@ -45,17 +46,20 @@ struct GUIInterface : GUISystem::Interface {
 
 struct Runner final
 {
-	Runner() 
-		: m_allocator(m_main_allocator) 
-	{
+	Runner()
+		: m_allocator(m_main_allocator) {
 		debug::init(m_allocator);
 		profiler::init(m_allocator);
 		if (!jobs::init(os::getCPUsCount(), m_allocator)) {
 			logError("Failed to initialize job system.");
 		}
+		if (!jobsystem::init(os::getCPUsCount(), m_allocator)) {
+			logError("Failed to initialize job system.");
+		}
 	}
 
 	~Runner() {
+		jobsystem::shutdown();
 		jobs::shutdown();
 		profiler::shutdown();
 		debug::shutdown();
