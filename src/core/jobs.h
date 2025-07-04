@@ -63,7 +63,7 @@ struct Signal {
 		}
 	}
 
-private:
+//private:
 	AtomicI32 state;
 	Mutex mutex;
 	ConditionVariable cv;
@@ -78,12 +78,42 @@ LUMIX_CORE_API void wait(Signal* signal);
 
 LUMIX_CORE_API void wait(Counter* counter);
 
+LUMIX_CORE_API void enter(Mutex* mutex);
+LUMIX_CORE_API void exit(Mutex* mutex);
+
 LUMIX_CORE_API bool init(u8 workers_count, IAllocator& allocator);
 LUMIX_CORE_API IAllocator& getAllocator();
 LUMIX_CORE_API void shutdown();
 LUMIX_CORE_API u8 getWorkersCount();
 
-LUMIX_CORE_API void run(void* data, void (*task)(void*), Counter* counter, u8 worker_index);
+LUMIX_CORE_API void run(void* data, void (*task)(void*), Counter* counter, u8 worker_index = ANY_WORKER);
+template <typename F> void runLambda(F&& f, Counter* counter, u8 worker_index = ANY_WORKER);
+
+template <typename F> void runLambda(F&& f, Counter* on_finish, u8 worker) {
+	void* arg;
+	if constexpr (sizeof(f) == sizeof(void*) && __is_trivially_copyable(F)) {
+		memcpy(&arg, &f, sizeof(arg));
+		run(
+			arg,
+			[](void* arg) {
+				F* f = (F*)&arg;
+				(*f)();
+			},
+			on_finish,
+			worker);
+	} else {
+		F* tmp = LUMIX_NEW(getAllocator(), F)(static_cast<F&&>(f));
+		run(
+			tmp,
+			[](void* arg) {
+				F* f = (F*)arg;
+				(*f)();
+				LUMIX_DELETE(getAllocator(), f);
+			},
+			on_finish,
+			worker);
+	}
+}
 
 template <typename F> void forEach(u32 count, u32 step, const F& f) {
 	if (count == 0) return;

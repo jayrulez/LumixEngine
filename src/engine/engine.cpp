@@ -2,6 +2,7 @@
 #include "core/debug.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log_callback.h"
 #include "core/math.h"
 #include "core/os.h"
@@ -257,7 +258,8 @@ struct EngineImpl final : Engine {
 		const i32 cap = LZ4_compressBound(mem.length());
 		const u32 start_size = (u32)output.size();
 		output.resize(cap + start_size);
-		jobs::MutexGuard guard(m_lz4_mutex);
+		//jobs::MutexGuard guard(m_lz4_mutex);
+		MutexGuard guard(m_lz4_mutex);
 		const i32 compressed_size = LZ4_compress_fast_extState(m_lz4_state, (const char*)mem.begin(), (char*)output.getMutableData() + start_size, mem.length(), cap, 1); 
 		if (compressed_size == 0) return false;
 		output.resize(compressed_size + start_size);
@@ -314,9 +316,10 @@ struct EngineImpl final : Engine {
 
 		if (!m_paused || m_next_frame) {
 			auto& modules =  world.getModules();
-			jobs::forEach(modules.size(), 1, [&](u32 idx, u32){
+			/*jobs::forEach(modules.size(), 1, [&](u32 idx, u32){
 				modules[idx]->updateParallel(dt);
-			});
+			});*/
+			jobsystem::forEach(modules.size(), 1, [&](u32 idx, u32) { modules[idx]->updateParallel(dt); });
 			{
 				PROFILE_BLOCK("update modules");
 				for (UniquePtr<IModule>& module : modules)
@@ -419,7 +422,8 @@ private:
 	os::OutputFile m_log_file;
 	bool m_is_log_file_open = false;
 	u8* m_lz4_state = nullptr;
-	jobs::Mutex m_lz4_mutex;
+	//jobs::Mutex m_lz4_mutex;
+	Mutex m_lz4_mutex;
 };
 
 

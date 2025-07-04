@@ -868,7 +868,8 @@ struct SRVUAVHeap {
 	u32 max_transient_count = 0;
 	u32 transient_count = 0;
 	u32 frame = 0;
-	jobs::Mutex mutex;
+	//jobs::Mutex mutex;
+	Mutex mutex;
 };
 
 struct RTVDSVHeap {

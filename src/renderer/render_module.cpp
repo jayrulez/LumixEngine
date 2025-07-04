@@ -8,6 +8,7 @@
 #include "core/geometry.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/page_allocator.h"
@@ -526,10 +527,11 @@ struct RenderModuleImpl final : RenderModule {
 		if (!m_is_game_running) return;
 
 		StackArray<EntityRef, 16> to_delete(m_allocator);
-		jobs::Mutex mutex;
+		//jobs::Mutex mutex;
+		Mutex mutex;
 		ParticleSystem::Stats stats = {};
 		// TODO move to parallel update?
-		jobs::forEach(m_particle_emitters.capacity(), 1, [&](i32 idx, i32){
+		/*jobs::forEach(m_particle_emitters.capacity(), 1, [&](i32 idx, i32){
 			ParticleSystem* ps = m_particle_emitters.getFromIndex(idx);
 			if (!ps) return;
 
@@ -537,6 +539,20 @@ struct RenderModuleImpl final : RenderModule {
 				jobs::enter(&mutex);
 				to_delete.push(*ps->m_entity);
 				jobs::exit(&mutex);
+			}
+
+			stats.emitted.add(ps->m_last_update_stats.emitted);
+			stats.killed.add(ps->m_last_update_stats.killed);
+			stats.processed.add(ps->m_last_update_stats.processed);
+		});*/
+		jobsystem::forEach(m_particle_emitters.capacity(), 1, [&](i32 idx, i32) {
+			ParticleSystem* ps = m_particle_emitters.getFromIndex(idx);
+			if (!ps) return;
+
+			if (ps->update(dt, m_engine.getPageAllocator())) {
+				jobsystem::enter(&mutex);
+				to_delete.push(*ps->m_entity);
+				jobsystem::exit(&mutex);
 			}
 
 			stats.emitted.add(ps->m_last_update_stats.emitted);

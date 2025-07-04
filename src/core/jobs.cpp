@@ -146,12 +146,22 @@ void wait(Counter* counter) {
 	counter->wait();
 }
 
+void enter(Mutex* mutex) {
+	mutex->enter();
+}
+void exit(Mutex* mutex) {
+	mutex->exit();
+}
+
 bool init(u8 workers_count, IAllocator& allocator) {
 	g_system.create(allocator);
 
 	return g_system->init(workers_count);
 }
 
+IAllocator& getAllocator() {
+	return g_system->allocator;
+}
 
 u8 getWorkersCount() {
 	const int c = g_system->getWorkersCount();

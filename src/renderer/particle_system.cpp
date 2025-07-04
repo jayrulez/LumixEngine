@@ -3,6 +3,7 @@
 #include "core/atomic.h"
 #include "engine/core.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/metaprogramming.h"
@@ -845,7 +846,8 @@ struct ParticleSystem::ChunkProcessorContext {
 
 	u32 instructions_offset = 0;
 	u32* kill_counter = nullptr;
-	jobs::Mutex* emit_mutex = nullptr;
+	//jobs::Mutex* emit_mutex = nullptr;
+	Mutex* emit_mutex = nullptr;
 	OutputPagedStream* emit_stream = nullptr;
 	float time_delta = 0;
 	float* output_memory = nullptr;
@@ -915,11 +917,13 @@ void ParticleSystem::processChunk(ChunkProcessorContext& ctx) {
 								emit_ctx.outputs.resize(m_resource->getEmitters()[emitter_idx].emit_inputs_count);
 								run(emit_ctx);
 								
-								jobs::enter(ctx.emit_mutex);
+								//jobs::enter(ctx.emit_mutex);
+								jobsystem::enter(ctx.emit_mutex);
 								ctx.emit_stream->write(emitter_idx);
 								ctx.emit_stream->write(emit_ctx.outputs.size());
 								ctx.emit_stream->write(emit_ctx.outputs.begin(), emit_ctx.outputs.byte_size());
-								jobs::exit(ctx.emit_mutex);
+								//jobs::exit(ctx.emit_mutex);
+								jobsystem::exit(ctx.emit_mutex);
 							}
 						}
 					}
@@ -1072,7 +1076,21 @@ void ParticleSystem::applyTransform(const Transform& new_tr) {
 	for (i32 emitter_idx = 0; emitter_idx < m_emitters.size(); ++emitter_idx) {
 		Emitter& emitter = m_emitters[emitter_idx];
 		if ((u32)m_resource->getFlags() & (u32)ParticleSystemResource::Flags::WORLD_SPACE) {
-			jobs::forEach(emitter.particles_count, 4096, [&](u32 from, u32 to){
+			//jobs::forEach(emitter.particles_count, 4096, [&](u32 from, u32 to){
+			//	PROFILE_BLOCK("to world space");
+			//	// TODO make sure first 3 channels are position
+			//	float* LUMIX_RESTRICT x = emitter.channels[0].data;
+			//	float* LUMIX_RESTRICT y = emitter.channels[1].data;
+			//	float* LUMIX_RESTRICT z = emitter.channels[2].data;
+			//	for (u32 i = from; i < to; ++i) {
+			//		Vec3 p{x[i], y[i], z[i]};
+			//		p = Vec3(delta_tr.transform(p));
+			//		x[i] = p.x;
+			//		y[i] = p.y;
+			//		z[i] = p.z;
+			//	}
+			//});
+			jobsystem::forEach(emitter.particles_count, 4096, [&](u32 from, u32 to) {
 				PROFILE_BLOCK("to world space");
 				// TODO make sure first 3 channels are position
 				float* LUMIX_RESTRICT x = emitter.channels[0].data;
@@ -1119,7 +1137,8 @@ void ParticleSystem::update(float dt, u32 emitter_idx, PageAllocator& page_alloc
 	ASSERT(chunks_count <= PageAllocator::PAGE_SIZE / sizeof(u32));
 	memset(kill_counter, 0, chunks_count * sizeof(u32));
 	OutputPagedStream emit_stream(page_allocator);
-	jobs::Mutex emit_mutex;
+	//jobs::Mutex emit_mutex;
+	Mutex emit_mutex;
 
 	AtomicI32 counter = 0;
 	auto update = [&](){
@@ -1144,7 +1163,8 @@ void ParticleSystem::update(float dt, u32 emitter_idx, PageAllocator& page_alloc
 	
 	m_last_update_stats.processed.add(emitter.particles_count);
 	if (emitter.particles_count <= 4096) update();
-	else jobs::runOnWorkers(update);
+	//else jobs::runOnWorkers(update);
+	else jobsystem::runOnWorkers(update);
 
 	{
 		PROFILE_BLOCK("compact");
@@ -1259,7 +1279,8 @@ void ParticleSystem::Emitter::fillInstanceData(float* data, PageAllocator& page_
 	};
 
 	if (particles_count <= 4096) fill();
-	else jobs::runOnWorkers(fill);
+	//else jobs::runOnWorkers(fill);
+	else jobsystem::runOnWorkers(fill);
 }
 
 
