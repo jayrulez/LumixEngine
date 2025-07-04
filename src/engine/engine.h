@@ -4,6 +4,7 @@
 
 #include "core/allocator.h"
 #include "core/span.h"
+#include "core/jobs.h"
 
 namespace Lumix {
 
@@ -38,6 +39,7 @@ struct LUMIX_ENGINE_API Engine {
 	virtual void setMainWindow(os::WindowHandle win) = 0;
 	virtual os::WindowHandle getMainWindow() = 0;
 
+	virtual jobs2::JobSystem& getJobSystem() = 0;
 	virtual struct FileSystem& getFileSystem() = 0;
 	virtual struct InputSystem& getInputSystem() = 0;
 	virtual struct SystemManager& getSystemManager() = 0;

@@ -76,6 +76,9 @@ struct EngineImpl final : Engine {
 
 		os::logInfo();
 
+		m_job_system = jobs2::JobSystem::create(m_allocator);
+		m_job_system->init(4);
+
 		if (init_data.file_system.get()) {
 			m_file_system = static_cast<UniquePtr<FileSystem>&&>(init_data.file_system);
 		}
@@ -139,6 +142,9 @@ struct EngineImpl final : Engine {
 		m_system_manager.reset();
 		m_input_system.reset();
 		m_file_system.reset();
+
+		m_job_system->shutdown();
+		m_job_system.reset();
 
 		unregisterLogCallback<&EngineImpl::logToFile>(this);
 		m_log_file.close();
@@ -394,6 +400,7 @@ struct EngineImpl final : Engine {
 	}
 
 	SystemManager& getSystemManager() override { return *m_system_manager; }
+	jobs2::JobSystem& getJobSystem() override { return *m_job_system; }
 	FileSystem& getFileSystem() override { return *m_file_system; }
 	InputSystem& getInputSystem() override { return *m_input_system; }
 	ResourceManagerHub& getResourceManager() override { return m_resource_manager; }
@@ -402,6 +409,7 @@ struct EngineImpl final : Engine {
 private:
 	TagAllocator m_allocator;
 	PageAllocator m_page_allocator;
+	UniquePtr<jobs2::JobSystem> m_job_system;
 	UniquePtr<FileSystem> m_file_system;
 	ResourceManagerHub m_resource_manager;
 	UniquePtr<SystemManager> m_system_manager;
