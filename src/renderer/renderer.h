@@ -28,10 +28,12 @@ struct RenderbufferDesc {
 };
 
 struct RenderBufferHandle {
-	constexpr RenderBufferHandle() : value(0xffFFffFF) {}
-	explicit constexpr RenderBufferHandle(u32 value) : value(value) {}
+	constexpr RenderBufferHandle()
+		: value(0xffFFffFF) {}
+	explicit constexpr RenderBufferHandle(u32 value)
+		: value(value) {}
 	operator u32() const { return value; }
-	bool operator ==(const RenderBufferHandle& rhs) const { return value == rhs.value; }
+	bool operator==(const RenderBufferHandle& rhs) const { return value == rhs.value; }
 	u32 value;
 };
 
@@ -51,10 +53,10 @@ struct LUMIX_RENDERER_API RenderPlugin {
 	virtual RenderBufferHandle renderAA(const GBuffer& gbuffer, RenderBufferHandle input, Pipeline& pipeline);
 	// returns true if plugin's tonemap run and builtin tonemap should not run
 	virtual bool tonemap(RenderBufferHandle input, RenderBufferHandle& output, Pipeline& pipeline);
-	
+
 	virtual void debugUI(Pipeline&) {}
 	virtual bool debugOutput(RenderBufferHandle input, Pipeline& pipeline);
-	
+
 	virtual void pipelineDestroyed(Pipeline& pipeline) {}
 	virtual void frame(struct Renderer& renderer) {}
 };
@@ -80,16 +82,14 @@ struct LUMIX_RENDERER_API Renderer : ISystem {
 	virtual void frame() = 0;
 	virtual u32 frameNumber() const = 0;
 	virtual void waitForRender() = 0;
-	virtual void waitForCommandSetup() = 0;
-	virtual void waitCanSetup() = 0;
 	virtual struct Engine& getEngine() = 0;
 	virtual float getLODMultiplier() const = 0;
 	virtual void setLODMultiplier(float value) = 0;
-	
+
 	virtual struct ArenaAllocator& getCurrentFrameAllocator() = 0;
 	virtual IAllocator& getAllocator() = 0;
 	virtual MemRef allocate(u32 size) = 0;
-	virtual MemRef copy(const void* data, u32 size) = 0 ;
+	virtual MemRef copy(const void* data, u32 size) = 0;
 	virtual void free(const MemRef& memory) = 0;
 
 	virtual void addPlugin(RenderPlugin& plugin) = 0;
@@ -107,20 +107,20 @@ struct LUMIX_RENDERER_API Renderer : ISystem {
 	virtual u32 getMaxSortKey() const = 0;
 	virtual const Mesh** getSortKeyToMeshMap() const = 0;
 	virtual void enableBuiltinTAA(bool enable) = 0;
-	
+
 	virtual const char* getSemanticDefines(Span<const AttributeSemantic> attributes) = 0;
 
 	virtual struct FontManager& getFontManager() = 0;
 	virtual struct ResourceManager& getTextureManager() = 0;
-	
+
 	virtual u32 createMaterialConstants(Span<const float> data) = 0;
 	virtual void destroyMaterialConstants(u32 id) = 0;
 	virtual gpu::BufferHandle getMaterialUniformBuffer() = 0;
-	
+
 	virtual TransientSlice allocTransient(u32 size) = 0;
 	virtual TransientSlice allocUniform(u32 size) = 0;
 	virtual TransientSlice allocUniform(const void* data, u32 size) = 0;
-	
+
 	virtual gpu::BufferHandle getInstancedMeshesBuffer() = 0;
 	virtual gpu::BufferHandle createBuffer(const MemRef& memory, gpu::BufferFlags flags, const char* debug_name) = 0;
 	virtual gpu::TextureHandle createTexture(u32 w, u32 h, u32 depth, gpu::TextureFormat format, gpu::TextureFlags flags, const MemRef& memory, const char* debug_name) = 0;
@@ -134,53 +134,29 @@ struct LUMIX_RENDERER_API Renderer : ISystem {
 	virtual DrawStream& getDrawStream() = 0;
 	virtual DrawStream& getEndFrameDrawStream() = 0;
 
-	template <typename T> void pushJob(const char* name, const T& func);
+	// Simplified render command execution - no more job system
+	template <typename T> void executeRenderCommand(const char* name, const T& func);
 
 	virtual void beginProfileBlock(const char* name, i64 link, bool stats = false) = 0;
 	virtual void endProfileBlock() = 0;
+};
 
-protected:
-	virtual void setupJob(void* user_ptr, void(*task)(void*)) = 0;
-}; 
+template <typename T> void Renderer::executeRenderCommand(const char* name, const T& func) {
+	if (name) {
+		profiler::beginBlock(name);
+		const i64 link = profiler::createNewLinkID();
+		profiler::link(link);
+		profiler::blockColor(Color(0x7f, 0, 0x7f, 0xff).abgr());
+		beginProfileBlock(name, link, false);
+	}
 
+	// Execute directly instead of queuing as job
+	func(getDrawStream());
 
-template <typename T>
-void Renderer::pushJob(const char* name, const T& func) {
-	struct Context {
-		Context(DrawStream& stream, T func, const char* name) 
-			: stream(stream)
-			, func(func)
-			, name(name)
-		{}
-
-		static void run(void* ptr) {
-			Context* that = (Context*)ptr;
-			if (that->name) {
-				profiler::beginBlock(that->name);
-				const i64 link = profiler::createNewLinkID();
-				profiler::link(link);
-				profiler::blockColor(Color(0x7f, 0, 0x7f, 0xff).abgr());
-				that->stream.beginProfileBlock(that->name, link, false);
-			}
-			that->func(that->stream);
-			if (that->name) {
-				that->stream.endProfileBlock();
-				profiler::endBlock();
-			}
-			that->~Context();
-		}
-
-		DrawStream& stream;
-		T func;
-		const char* name;
-	};
-	
-	DrawStream& parent = getDrawStream();
-	u8* mem = parent.userAlloc(sizeof(Context));
-	DrawStream& stream = parent.createSubstream();
-	Context* ctx = new (NewPlaceholder(), mem) Context(stream, func, name);
-	setupJob(ctx, &Context::run);
+	if (name) {
+		endProfileBlock();
+		profiler::endBlock();
+	}
 }
 
 } // namespace Lumix
-
