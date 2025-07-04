@@ -646,7 +646,7 @@ struct SceneView::RenderPlugin : Lumix::RenderPlugin {
 			renderer.setRenderTargets({}, selection_mask);
 			pipeline.clear(gpu::ClearFlags::ALL, 0, 0, 0, 0, 0);
 	
-			renderer.pushJob("selection", [&pipeline, &renderer, this, &entities](DrawStream& stream) {
+			renderer.executeRenderCommand("selection", [&pipeline, &renderer, this, &entities](DrawStream& stream) {
 				RenderModule* module = pipeline.getModule();
 				const World& world = module->getWorld();
 				const u32 skinned_define = 1 << renderer.getShaderDefineIdx("SKINNED");
@@ -749,7 +749,7 @@ struct SceneView::RenderPlugin : Lumix::RenderPlugin {
 			DrawStream& stream = pipeline.getRenderer().getDrawStream();
 			pipeline.setUniform(pipeline.toBindless(gbuffer.DS, stream), UniformBuffer::DRAWCALL2);
 
-			renderer.pushJob("icons", [this, &renderer](DrawStream& stream) {
+			renderer.executeRenderCommand("icons", [this, &renderer](DrawStream& stream) {
 				const Viewport& vp = m_scene_view.m_view->getViewport();
 				const Matrix camera_mtx({ 0, 0, 0 }, vp.rot);
 
@@ -787,7 +787,7 @@ struct SceneView::RenderPlugin : Lumix::RenderPlugin {
 			renderer.setRenderTargets(Span(&input, 1), icons_ds);
 			pipeline.clear(gpu::ClearFlags::DEPTH, 0, 0, 0, 0, 0);
 
-			renderer.pushJob("gizmos", [&renderer, &vertices, this](DrawStream& stream) {
+			renderer.executeRenderCommand("gizmos", [&renderer, &vertices, this](DrawStream& stream) {
 				Renderer::TransientSlice vb = renderer.allocTransient(vertices.byte_size());
 				memcpy(vb.ptr, vertices.begin(), vertices.byte_size());
 				const Renderer::TransientSlice ub = renderer.allocUniform(&Matrix::IDENTITY.columns[0].x, sizeof(Matrix));
