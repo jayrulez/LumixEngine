@@ -1,13 +1,13 @@
+#include "core/jobs.h"
 #include "core/array.h"
 #include "core/atomic.h"
+#include "core/string.h"
 #include "core/sync.h"
 #include "core/thread.h"
-#include "core/jobs.h"
-#include "core/string.h"
 
 namespace Lumix {
 
-namespace jobs2 {
+namespace jobsystem {
 
 struct WorkerThread : Thread {
 	WorkerThread(IAllocator& allocator, u32 worker_id)
@@ -65,13 +65,13 @@ struct WorkerThread : Thread {
 	AtomicI32 should_stop;
 };
 
-struct JobSystemImpl : public JobSystem {
-	JobSystemImpl(IAllocator& allocator)
+struct JobSystem {
+	JobSystem(IAllocator& allocator)
 		: allocator(allocator)
 		, workers(allocator)
 		, worker_index(0) {}
 
-	bool init(u8 workers_count) override {
+	bool init(u8 workers_count) {
 		const u32 count = workers_count > 1 ? workers_count : 1;
 		workers.reserve(count);
 
@@ -86,7 +86,7 @@ struct JobSystemImpl : public JobSystem {
 		return !workers.empty();
 	}
 
-	void run(void* data, void (*task)(void*), Counter* counter, u8 worker_index_param) override {
+	void run(void* data, void (*task)(void*), Counter* counter, u8 worker_index_param) {
 		if (counter) counter->increment();
 
 		WorkerThread::Job job;
@@ -105,7 +105,7 @@ struct JobSystemImpl : public JobSystem {
 		}
 	}
 
-	void shutdown() override {
+	void shutdown() {
 		for (auto& worker : workers) {
 			worker->should_stop = 1; // Use assignment operator
 			worker->cv.wakeup();
@@ -120,17 +120,52 @@ struct JobSystemImpl : public JobSystem {
 		workers.clear();
 	}
 
-	u8 getWorkersCount() override {
-		return workers.size();
-	}
+	u8 getWorkersCount() { return workers.size(); }
 
 	IAllocator& allocator;
 	Array<UniquePtr<WorkerThread>> workers;
 	AtomicI32 worker_index;
 };
 
-UniquePtr<JobSystem> JobSystem::create(IAllocator& allocator) {
-	return UniquePtr<JobSystemImpl>::create(allocator, allocator);
+static Local<JobSystem> g_system;
+
+
+void turnRed(Signal* signal) {
+	signal->turnRed();
+}
+
+void turnGreen(Signal* signal) {
+	signal->turnGreen();
+}
+
+void wait(Signal* signal) {
+	signal->wait();
+}
+
+void wait(Counter* counter) {
+	counter->wait();
+}
+
+bool init(u8 workers_count, IAllocator& allocator) {
+	g_system.create(allocator);
+
+	return g_system->init(workers_count);
+}
+
+
+u8 getWorkersCount() {
+	const int c = g_system->getWorkersCount();
+	ASSERT(c <= 0xff);
+	return (u8)c;
+}
+
+void shutdown() {
+	g_system->shutdown();
+	g_system.destroy();
+}
+
+void run(void* data, void (*task)(void*), Counter* counter, u8 worker_index) {
+	g_system->run(data, task, counter, worker_index);
 }
 
 } // namespace jobs2
