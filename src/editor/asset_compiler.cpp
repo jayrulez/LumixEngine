@@ -1,8 +1,8 @@
 #include "asset_compiler.h"
 #include "core/atomic.h"
-#include "core/atomic.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/os.h"
 #include "core/path.h"
@@ -239,7 +239,8 @@ struct AssetCompilerImpl : AssetCompiler {
 		}
 		file.close();
 		if (file.isError()) logError("Could not write ", out_path);
-		jobs::MutexGuard guard(m_resources_mutex);
+		//jobs::MutexGuard guard(m_resources_mutex);
+		MutexGuard guard(m_resources_mutex);
 		auto iter = m_resources.find(path.getHash());
 		if (!iter.isValid()) {
 			// Resource scane is async, so it's not guaranteed that the resource is in the m_resources list at this point
@@ -257,7 +258,8 @@ struct AssetCompilerImpl : AssetCompiler {
 
 	void addResource(ResourceType type, const Path& path) override {
 		const FilePathHash hash = path.getHash();
-		jobs::MutexGuard lock(m_resources_mutex);
+		//jobs::MutexGuard lock(m_resources_mutex);
+		MutexGuard lock(m_resources_mutex);
 		if (m_resources.find(hash).isValid()) {
 			m_resources[hash] = {path, type, dirHash(path)};
 		}
@@ -648,14 +650,24 @@ struct AssetCompilerImpl : AssetCompiler {
 
 		m_res_in_progress = p.path.c_str();
 
-		jobs::runLambda([p, this]() mutable {
+		/*jobs::runLambda([p, this]() mutable {
 			PROFILE_BLOCK("compile asset");
 			profiler::pushString(p.path.c_str());
 			p.compiled = compile(p.path);
 			if (!p.compiled) logError("Failed to compile resource ", p.path);
 			MutexGuard lock(m_compiled_mutex);
 			m_compiled.push(p);
-		}, nullptr);
+		}, nullptr);*/
+		jobsystem::runLambda(
+			[p, this]() mutable {
+				PROFILE_BLOCK("compile asset");
+				profiler::pushString(p.path.c_str());
+				p.compiled = compile(p.path);
+				if (!p.compiled) logError("Failed to compile resource ", p.path);
+				MutexGuard lock(m_compiled_mutex);
+				m_compiled.push(p);
+			},
+			nullptr);
 	}
 
 	void update() override {
@@ -668,7 +680,8 @@ struct AssetCompilerImpl : AssetCompiler {
 			if (job.generation != generation) continue;
 
 			// this can take some time, mutex is probably not the best option
-			jobs::MutexGuard lock(m_resources_mutex);
+			//jobs::MutexGuard lock(m_resources_mutex);
+			MutexGuard lock(m_resources_mutex);
 			// reload/continue loading resource and its subresources
 			bool found_any = false;
 			for (const ResourceItem& ri : m_resources) {
@@ -722,7 +735,8 @@ struct AssetCompilerImpl : AssetCompiler {
 					m_on_list_changed.invoke(path_obj);
 				}
 				else {
-					jobs::MutexGuard lock(m_resources_mutex);
+					//jobs::MutexGuard lock(m_resources_mutex);
+					MutexGuard lock(m_resources_mutex);
 					m_resources.eraseIf([&](const ResourceItem& ri){
 						if (!startsWith(ri.path, path_obj)) return false;
 						return true;
@@ -751,7 +765,8 @@ struct AssetCompilerImpl : AssetCompiler {
 
 			if (getResourceType(path_obj) != INVALID_RESOURCE_TYPE) {
 				if (!m_app.getEngine().getFileSystem().fileExists(path_obj)) {
-					jobs::MutexGuard lock(m_resources_mutex);
+					//jobs::MutexGuard lock(m_resources_mutex);
+					MutexGuard lock(m_resources_mutex);
 					m_resources.eraseIf([&](const ResourceItem& ri){
 						if (!endsWithInsensitive(ri.path, path_obj)) return false;
 						return true;
@@ -799,11 +814,13 @@ struct AssetCompilerImpl : AssetCompiler {
 	}
 
 	void unlockResources() override {
-		jobs::exit(&m_resources_mutex);
+		//jobs::exit(&m_resources_mutex);
+		jobsystem::exit(&m_resources_mutex);
 	}
 
 	const HashMap<FilePathHash, ResourceItem>& lockResources() override {
-		jobs::enter(&m_resources_mutex);
+		//jobs::enter(&m_resources_mutex);
+		jobsystem::enter(&m_resources_mutex);
 		return m_resources;
 	}
 
@@ -811,7 +828,8 @@ struct AssetCompilerImpl : AssetCompiler {
 	Mutex m_compiled_mutex;
 	Mutex m_changed_mutex;
 	Mutex m_plugin_mutex;
-	jobs::Mutex m_resources_mutex;
+	//jobs::Mutex m_resources_mutex;
+	Mutex m_resources_mutex;
 	HashMap<Path, u32> m_generations; 
 	HashMap<Path, Array<Path>> m_dependencies; 
 	Array<Path> m_changed_files;

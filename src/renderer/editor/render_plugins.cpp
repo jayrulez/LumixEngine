@@ -15,6 +15,7 @@
 #include "core/geometry.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/path.h"
 #include "core/profiler.h"
@@ -188,7 +189,7 @@ static void downsampleNormal(Span<const u8> src, Span<u8> dst, u32 w, u32 h, u32
 	const u32* sptr = (const u32*)src.begin();
 	u32* dptr = (u32*)dst.begin();
 
-	jobs::forEach(dst_h, 1, [&](i32 j, i32) {
+	jobsystem::forEach(dst_h, 1, [&](i32 j, i32) {
 		RandomGenerator rg(521288629, 362436069 + 1337 * j);
 		for (u32 i = 0; i < dst_w; ++i) {
 			float r = rg.randFloat(0, rh);
@@ -236,7 +237,7 @@ static void compressBC1(Span<const u8> src, OutputMemoryStream& dst, u32 w, u32 
 	dst.resize(offset + size);
 	u8* out = dst.getMutableData() + offset;
 
-	jobs::forEach(h, 4, [&](i32 j, i32){
+	jobsystem::forEach(h, 4, [&](i32 j, i32){
 		PROFILE_FUNCTION();
 		u32 tmp[32];
 		const u8* src_row_begin = &src[j * w * 4];
@@ -271,7 +272,7 @@ static void compressBC5(Span<const u8> src, OutputMemoryStream& dst, u32 w, u32 
 	dst.resize(offset + size);
 	u8* out = dst.getMutableData() + offset;
 
-	jobs::forEach(h, 4, [&](i32 j, i32){
+	jobsystem::forEach(h, 4, [&](i32 j, i32){
 		PROFILE_FUNCTION();
 		u32 tmp[32];
 		const u8* src_row_begin = &src[j * w * 4];
@@ -301,7 +302,7 @@ static void compressBC3(Span<const u8> src, OutputMemoryStream& dst, u32 w, u32 
 	dst.resize(offset + size);
 	u8* out = dst.getMutableData() + offset;
 
-	jobs::forEach(h, 4, [&](i32 j, i32){
+	jobsystem::forEach(h, 4, [&](i32 j, i32){
 		PROFILE_FUNCTION();
 		u32 tmp[32] = {};
 		const u8* src_row_begin = &src[j * w * 4];
@@ -1497,7 +1498,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 		if (!m_jobs_tail) m_jobs_head = nullptr;
 
 		// to keep editor responsive, we don't want to create too many tiles per frame 
-		jobs::run(job, &TextureTileJob::execute, nullptr, jobs::getWorkersCount() - 1);
+		jobsystem::run(job, &TextureTileJob::execute, nullptr, jobsystem::getWorkersCount() - 1);
 	}
 
 	bool createTile(const char* in_path, const char* out_path, Color tint) {
@@ -1618,7 +1619,7 @@ struct TexturePlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 			dst.write(gpu_format);
 
 			static bool once = [](){ basisu::basisu_encoder_init(); return true; }();
-			basisu::job_pool job_pool(jobs::getWorkersCount());
+			basisu::job_pool job_pool(jobsystem::getWorkersCount());
 			basisu::basis_compressor c;
 			basisu::basis_compressor_params params;
 			params.m_pJob_pool = &job_pool;
@@ -2004,7 +2005,7 @@ struct ImpostorTexturesContextImpl final : public ImpostorTexturesContext {
 	IAllocator& allocator;
 	StudioApp& app;
 	u32 to_read = 0;
-	jobs::Signal done_signal; // set to green when we have all data in memory (gb0_rgba...)
+	jobsystem::Signal done_signal; // set to green when we have all data in memory (gb0_rgba...)
 	Array<u32> gb0_rgba;
 	Array<u32> gb1_rgba;
 	Array<u16> gb_depth; // TODO check original, might need to 0xffff - x - it
@@ -2559,7 +2560,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 
 	~ModelPlugin() {
 		if (m_downscale_program) m_renderer->getEndFrameDrawStream().destroy(m_downscale_program);
-		jobs::wait(&m_subres_signal);
+		jobsystem::wait(&m_subres_signal);
 		
 		Engine& engine = m_app.getEngine();
 		if (m_tile.world) engine.destroyWorld(*m_tile.world);
@@ -2587,7 +2588,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 
 		ModelMeta meta(m_app.getAllocator());
 		meta.load(_path, m_app);
-		jobs::runLambda([this, _path, meta = static_cast<ModelMeta&&>(meta)]() {
+		jobsystem::runLambda([this, _path, meta = static_cast<ModelMeta&&>(meta)]() {
 			ModelImporter* importer = createFBXImporter(m_app, m_app.getAllocator());
 			AssetCompiler& compiler = m_app.getAssetCompiler();
 
@@ -3112,7 +3113,7 @@ struct ModelPlugin final : AssetBrowser::IPlugin, AssetCompiler::IPlugin {
 	StudioApp& m_app;
 	Renderer* m_renderer = nullptr;
 	TexturePlugin* m_texture_plugin;
-	jobs::Counter m_subres_signal;
+	jobsystem::Counter m_subres_signal;
 	gpu::ProgramHandle m_downscale_program = gpu::INVALID_PROGRAM;
 	UniquePtr<MultiEditor<Asset>> m_multi_editor;
 };

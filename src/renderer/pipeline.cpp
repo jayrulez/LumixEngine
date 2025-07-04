@@ -5,6 +5,7 @@
 #include "core/geometry.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/os.h"
@@ -225,7 +226,8 @@ struct PipelineImpl final : Pipeline {
 			}
 
 			~Inserter() {
-				jobs::MutexGuard guard(sorter.mutex);
+				//jobs::MutexGuard guard(sorter.mutex);
+				MutexGuard guard(sorter.mutex);
 				if (!sorter.first_page) {
 					sorter.first_page = first_page;
 					sorter.last_page = last_page;
@@ -307,7 +309,8 @@ struct PipelineImpl final : Pipeline {
 		PageAllocator& page_allocator;
 		Page* first_page = nullptr;
 		Page* last_page = nullptr;
-		jobs::Mutex mutex;
+		//jobs::Mutex mutex;
+		Mutex mutex;
 		Array<u64> keys;
 		Array<u64> values;
 	};
@@ -421,6 +424,7 @@ struct PipelineImpl final : Pipeline {
 			, buckets(allocator)
 		{}
 		~View() {
+			//ASSERT((ready.state & 1) == 0);
 			ASSERT((ready.state & 1) == 0);
 		}
 
@@ -434,7 +438,8 @@ struct PipelineImpl final : Pipeline {
 		CullResult* renderables = nullptr;
 		CameraParams cp;
 		u8 layer_to_bucket[255];
-		jobs::Signal ready;
+		//jobs::Signal ready;
+		jobsystem::Signal ready;
 	};
 
 	// converts float to u32 so it can be used in radix sort
@@ -818,7 +823,8 @@ struct PipelineImpl final : Pipeline {
 		}
 
 		View* view_ptr = view.get();
-		jobs::turnRed(&view->ready);
+		//jobs::turnRed(&view->ready);
+		jobsystem::turnRed(&view->ready);
 		m_renderer.pushJob("prepare view", [this, view_ptr](DrawStream& stream) {
 			setupFur(*view_ptr);
 			setupParticles(*view_ptr);
@@ -838,7 +844,8 @@ struct PipelineImpl final : Pipeline {
 				createCommands(*view_ptr);
 			}
 
-			jobs::turnGreen(&view_ptr->ready);
+			//jobs::turnGreen(&view_ptr->ready);
+			jobsystem::turnGreen(&view_ptr->ready);
 		});
 
 		return m_views.size() - 1;
@@ -847,7 +854,8 @@ struct PipelineImpl final : Pipeline {
 	void renderBucket(u32 view_idx, u32 bucket_idx) const override {
 		View* view = m_views[view_idx].get();
 		m_renderer.pushJob("render bucket", [view, bucket_idx](DrawStream& stream) {
-			jobs::wait(&view->ready);
+			//jobs::wait(&view->ready);
+			jobsystem::wait(&view->ready);
 			Bucket& bucket = view->buckets[bucket_idx];
 			stream.merge(bucket.stream);
 		});
@@ -1992,10 +2000,29 @@ struct PipelineImpl final : Pipeline {
 		Sorter::Inserter inserter(view.sorter);
 		// TODO culling
 
-		jobs::forEach(particle_systems.capacity(), 1, [&](i32 idx, i32){
+		/*jobs::forEach(particle_systems.capacity(), 1, [&](i32 idx, i32){
 			const ParticleSystem* system = particle_systems.getFromIndex(idx);
 			if (!system) return;
 			
+			PROFILE_BLOCK("setup particles");
+			for (ParticleSystem::Emitter& emitter : system->getEmitters()) {
+				const Material* material = emitter.resource_emitter.material;
+				if (!material) continue;
+
+				const u8 bucket_idx = view.layer_to_bucket[material->getLayer()];
+				if (bucket_idx == 0xff) continue;
+
+				const u32 size = emitter.getParticlesDataSizeBytes();
+				if (size == 0) continue;
+
+				emitter.slice = m_renderer.allocTransient(size);
+				emitter.fillInstanceData((float*)emitter.slice.ptr, m_renderer.getEngine().getPageAllocator());
+			}
+		});*/
+		jobsystem::forEach(particle_systems.capacity(), 1, [&](i32 idx, i32) {
+			const ParticleSystem* system = particle_systems.getFromIndex(idx);
+			if (!system) return;
+
 			PROFILE_BLOCK("setup particles");
 			for (ParticleSystem::Emitter& emitter : system->getEmitters()) {
 				const Material* material = emitter.resource_emitter.material;
@@ -3236,9 +3263,13 @@ struct PipelineImpl final : Pipeline {
 		if (view.renderables->header.count == 0 && !view.renderables->header.next) return;
 		PagedListIterator<const CullResult> iterator(view.renderables);
 
-		view.instancers.reserve(jobs::getWorkersCount());
+		//view.instancers.reserve(jobs::getWorkersCount());
+		view.instancers.reserve(jobsystem::getWorkersCount());
 		ArenaAllocator& allocator = m_renderer.getCurrentFrameAllocator();
-		for (u8 i = 0; i < jobs::getWorkersCount(); ++i) {
+		//for (u8 i = 0; i < jobs::getWorkersCount(); ++i) {
+		//	view.instancers.emplace(allocator, m_renderer.getEngine().getPageAllocator());
+		//}
+		for (u8 i = 0; i < jobsystem::getWorkersCount(); ++i) {
 			view.instancers.emplace(allocator, m_renderer.getEngine().getPageAllocator());
 		}
 
@@ -3257,231 +3288,228 @@ struct PipelineImpl final : Pipeline {
 				bucket_map[i] |= 0x100;
 			}
 		}
-		jobs::runOnWorkers([&](){
-			PROFILE_BLOCK("create keys");
-			int total = 0;
-			ModelInstance* LUMIX_RESTRICT model_instances = m_module->getModelInstances().begin();
-			const Transform* LUMIX_RESTRICT transforms = m_module->getWorld().getTransforms();
-			const DVec3 camera_pos = view.cp.pos;
-			const DVec3 lod_ref_point = m_viewport.pos;
-			Sorter::Inserter inserter(view.sorter);
 
-			const i32 instancer_idx = worker_idx.inc();
-			AutoInstancer& instancer = view.instancers[instancer_idx];
-			instancer.init(m_renderer.getMaxSortKey() + 1);
+		auto lambda =
+			[&]() {
+				PROFILE_BLOCK("create keys");
+				int total = 0;
+				ModelInstance* LUMIX_RESTRICT model_instances = m_module->getModelInstances().begin();
+				const Transform* LUMIX_RESTRICT transforms = m_module->getWorld().getTransforms();
+				const DVec3 camera_pos = view.cp.pos;
+				const DVec3 lod_ref_point = m_viewport.pos;
+				Sorter::Inserter inserter(view.sorter);
 
-			for(;;) {
-				const CullResult* page = iterator.next();
-				if(!page) break;
-				total += page->header.count;
-				const EntityRef* LUMIX_RESTRICT renderables = page->entities;
-				const RenderableTypes type = (RenderableTypes)page->header.type;
-				const u64 type_mask = (u64)type << 32;
-				
-				switch(type) {
-					case RenderableTypes::LOCAL_LIGHT: break;
-					case RenderableTypes::DECAL: {
-						for (int i = 0, c = page->header.count; i < c; ++i) {
-							const EntityRef e = renderables[i];
-							const Material* material = m_module->getDecal(e).material;
-							const int layer = material->getLayer();
-							const u8 bucket = bucket_map[layer];
-							if (bucket < 0xff) {
-								// TODO material can have the same sort key as mesh
-								const u64 subrenderable = e.index | type_mask;
-								inserter.push(material->getSortKey() | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), subrenderable);
+				const i32 instancer_idx = worker_idx.inc();
+				AutoInstancer& instancer = view.instancers[instancer_idx];
+				instancer.init(m_renderer.getMaxSortKey() + 1);
+
+				for (;;) {
+					const CullResult* page = iterator.next();
+					if (!page) break;
+					total += page->header.count;
+					const EntityRef* LUMIX_RESTRICT renderables = page->entities;
+					const RenderableTypes type = (RenderableTypes)page->header.type;
+					const u64 type_mask = (u64)type << 32;
+
+					switch (type) {
+						case RenderableTypes::LOCAL_LIGHT: break;
+						case RenderableTypes::DECAL: {
+							for (int i = 0, c = page->header.count; i < c; ++i) {
+								const EntityRef e = renderables[i];
+								const Material* material = m_module->getDecal(e).material;
+								const int layer = material->getLayer();
+								const u8 bucket = bucket_map[layer];
+								if (bucket < 0xff) {
+									// TODO material can have the same sort key as mesh
+									const u64 subrenderable = e.index | type_mask;
+									inserter.push(material->getSortKey() | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), subrenderable);
+								}
 							}
+							break;
 						}
-						break;
-					}
-					case RenderableTypes::CURVE_DECAL: {
-						for (int i = 0, c = page->header.count; i < c; ++i) {
-							const EntityRef e = renderables[i];
-							const Material* material = m_module->getCurveDecal(e).material;
-							const int layer = material->getLayer();
-							const u8 bucket = bucket_map[layer];
-							if (bucket < 0xff) {
-								// TODO material can have the same sort key as mesh
-								const u64 subrenderable = e.index | type_mask;
-								inserter.push(material->getSortKey() | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), subrenderable);
+						case RenderableTypes::CURVE_DECAL: {
+							for (int i = 0, c = page->header.count; i < c; ++i) {
+								const EntityRef e = renderables[i];
+								const Material* material = m_module->getCurveDecal(e).material;
+								const int layer = material->getLayer();
+								const u8 bucket = bucket_map[layer];
+								if (bucket < 0xff) {
+									// TODO material can have the same sort key as mesh
+									const u64 subrenderable = e.index | type_mask;
+									inserter.push(material->getSortKey() | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), subrenderable);
+								}
 							}
+							break;
 						}
-						break;
-					}
-					case RenderableTypes::SKINNED:
-					case RenderableTypes::MESH_MATERIAL_OVERRIDE: {
-						for (int i = 0, c = page->header.count; i < c; ++i) {
-							const EntityRef e = renderables[i];
-							const DVec3 pos = transforms[e.index].pos;
-							ModelInstance& mi = model_instances[e.index];
-							const float squared_length = float(squaredLength(pos - lod_ref_point));
-								
-							const u32 lod_idx = mi.model->getLODMeshIndices(squared_length * global_lod_multiplier_rcp);
+						case RenderableTypes::SKINNED:
+						case RenderableTypes::MESH_MATERIAL_OVERRIDE: {
+							for (int i = 0, c = page->header.count; i < c; ++i) {
+								const EntityRef e = renderables[i];
+								const DVec3 pos = transforms[e.index].pos;
+								ModelInstance& mi = model_instances[e.index];
+								const float squared_length = float(squaredLength(pos - lod_ref_point));
 
-							auto create_key = [&](const LODMeshIndices& lod){
-								for (int mesh_idx = lod.from; mesh_idx <= lod.to; ++mesh_idx) {
-									const Mesh& mesh = mi.meshes[mesh_idx];
-									const u8 layer = mi.custom_material ? mi.custom_material->getLayer() : mesh.layer;
-									const u32 bucket = bucket_map[layer];
-									const u32 mesh_sort_key = mi.custom_material ? 0x00FFffFF : mesh.sort_key;
-									ASSERT(!mi.custom_material || mesh_idx == 0);
-									const u64 subrenderable = e.index | type_mask | ((u64)mesh_idx << SORT_KEY_MESH_IDX_SHIFT);
-									if (bucket < 0xff) {
-										const u64 key = mesh_sort_key | ((u64)bucket << SORT_KEY_BUCKET_SHIFT);
-										inserter.push(key, subrenderable);
-									} else if (bucket < 0xffFF) {
-										const DVec3 pos = transforms[e.index].pos;
-										const DVec3 rel_pos = pos - camera_pos;
-										const float squared_length = float(rel_pos.x * rel_pos.x + rel_pos.y * rel_pos.y + rel_pos.z * rel_pos.z);
-										const u32 depth_bits = floatFlip(*(u32*)&squared_length);
-										const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | depth_bits;
-										inserter.push(key, subrenderable);
+								const u32 lod_idx = mi.model->getLODMeshIndices(squared_length * global_lod_multiplier_rcp);
+
+								auto create_key = [&](const LODMeshIndices& lod) {
+									for (int mesh_idx = lod.from; mesh_idx <= lod.to; ++mesh_idx) {
+										const Mesh& mesh = mi.meshes[mesh_idx];
+										const u8 layer = mi.custom_material ? mi.custom_material->getLayer() : mesh.layer;
+										const u32 bucket = bucket_map[layer];
+										const u32 mesh_sort_key = mi.custom_material ? 0x00FFffFF : mesh.sort_key;
+										ASSERT(!mi.custom_material || mesh_idx == 0);
+										const u64 subrenderable = e.index | type_mask | ((u64)mesh_idx << SORT_KEY_MESH_IDX_SHIFT);
+										if (bucket < 0xff) {
+											const u64 key = mesh_sort_key | ((u64)bucket << SORT_KEY_BUCKET_SHIFT);
+											inserter.push(key, subrenderable);
+										} else if (bucket < 0xffFF) {
+											const DVec3 pos = transforms[e.index].pos;
+											const DVec3 rel_pos = pos - camera_pos;
+											const float squared_length = float(rel_pos.x * rel_pos.x + rel_pos.y * rel_pos.y + rel_pos.z * rel_pos.z);
+											const u32 depth_bits = floatFlip(*(u32*)&squared_length);
+											const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | depth_bits;
+											inserter.push(key, subrenderable);
+										}
 									}
-								}
-							};
+								};
 
-							if (mi.lod != lod_idx) {
-								if (view.cp.is_shadow) {
-									const u32 shadow_lod_idx = maximum((u32)mi.lod, lod_idx);
-									create_key(mi.model->getLODIndices()[shadow_lod_idx]);
+								if (mi.lod != lod_idx) {
+									if (view.cp.is_shadow) {
+										const u32 shadow_lod_idx = maximum((u32)mi.lod, lod_idx);
+										create_key(mi.model->getLODIndices()[shadow_lod_idx]);
+									} else {
+										const float d = lod_idx - mi.lod;
+										const float ad = fabsf(d);
+
+										if (ad <= time_delta) {
+											mi.lod = float(lod_idx);
+											create_key(mi.model->getLODIndices()[lod_idx]);
+										} else {
+											mi.lod += d / ad * time_delta;
+											const u32 cur_lod_idx = u32(mi.lod);
+											create_key(mi.model->getLODIndices()[cur_lod_idx]);
+											if (cur_lod_idx < 3) create_key(mi.model->getLODIndices()[cur_lod_idx + 1]);
+										}
+									}
+								} else {
+									const LODMeshIndices& lod = mi.model->getLODIndices()[lod_idx];
+									create_key(lod);
 								}
-								else {
+							}
+							break;
+						}
+						case RenderableTypes::MESH: {
+							const bool is_shadow = view.cp.is_shadow;
+							for (int i = 0, c = page->header.count; i < c; ++i) {
+								const EntityRef e = renderables[i];
+								const DVec3 pos = transforms[e.index].pos;
+								ModelInstance& mi = model_instances[e.index];
+								const float squared_length = float(squaredLength(pos - lod_ref_point));
+
+								const u32 lod_idx = mi.model->getLODMeshIndices(squared_length * global_lod_multiplier_rcp);
+
+								auto create_key = [&](const LODMeshIndices& lod) {
+									for (int mesh_idx = lod.from; mesh_idx <= lod.to; ++mesh_idx) {
+										const Mesh& mesh = mi.meshes[mesh_idx];
+										const u32 bucket = bucket_map[mesh.layer];
+										ASSERT(!mi.custom_material);
+										const u64 subrenderable = e.index | type_mask | ((u64)mesh_idx << SORT_KEY_MESH_IDX_SHIFT);
+										if (mi.flags & ModelInstance::MOVED && !is_shadow) {
+											// moved and unmoved meshes can't be drawn in single drawcall as they need different instance data
+											// but autoinstancer groups all instances of a mesh in single drawcall
+											// so we don't autoinstance moved meshes, only unmoved
+											const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | mesh.sort_key;
+											inserter.push(key, subrenderable);
+										} else if (bucket < 0xff) {
+											instancer.add(mesh.sort_key, subrenderable);
+										} else if (bucket < 0xffFF) {
+											const DVec3 pos = transforms[e.index].pos;
+											const DVec3 rel_pos = pos - camera_pos;
+											const float squared_length = float(rel_pos.x * rel_pos.x + rel_pos.y * rel_pos.y + rel_pos.z * rel_pos.z);
+											const u32 depth_bits = floatFlip(*(u32*)&squared_length);
+											const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | depth_bits;
+											inserter.push(key, subrenderable);
+										}
+									}
+								};
+
+								if (mi.lod != lod_idx) {
 									const float d = lod_idx - mi.lod;
 									const float ad = fabsf(d);
-									
+
 									if (ad <= time_delta) {
 										mi.lod = float(lod_idx);
 										create_key(mi.model->getLODIndices()[lod_idx]);
-									}
-									else {
-										mi.lod += d / ad * time_delta;
+									} else {
+										if (!is_shadow) mi.lod += d / ad * time_delta;
 										const u32 cur_lod_idx = u32(mi.lod);
 										create_key(mi.model->getLODIndices()[cur_lod_idx]);
 										if (cur_lod_idx < 3) create_key(mi.model->getLODIndices()[cur_lod_idx + 1]);
 									}
+								} else {
+									const LODMeshIndices& lod = mi.model->getLODIndices()[lod_idx];
+									create_key(lod);
 								}
 							}
-							else {
-								const LODMeshIndices& lod = mi.model->getLODIndices()[lod_idx];
-								create_key(lod);
-							}
+							break;
 						}
-						break;
+						case RenderableTypes::PARTICLES:
+						case RenderableTypes::FUR:
+						case RenderableTypes::COUNT: ASSERT(false); break;
 					}
-					case RenderableTypes::MESH: {
-						const bool is_shadow = view.cp.is_shadow;
-						for (int i = 0, c = page->header.count; i < c; ++i) {
-							const EntityRef e = renderables[i];
-							const DVec3 pos = transforms[e.index].pos;
-							ModelInstance& mi = model_instances[e.index];
-							const float squared_length = float(squaredLength(pos - lod_ref_point));
-								
-							const u32 lod_idx = mi.model->getLODMeshIndices(squared_length * global_lod_multiplier_rcp);
+				}
+				profiler::pushInt("count", total);
 
-							auto create_key = [&](const LODMeshIndices& lod){
-								for (int mesh_idx = lod.from; mesh_idx <= lod.to; ++mesh_idx) {
-									const Mesh& mesh = mi.meshes[mesh_idx];
-									const u32 bucket = bucket_map[mesh.layer];
-									ASSERT(!mi.custom_material);
-									const u64 subrenderable = e.index | type_mask | ((u64)mesh_idx << SORT_KEY_MESH_IDX_SHIFT);
-									if (mi.flags & ModelInstance::MOVED && !is_shadow) {
-										// moved and unmoved meshes can't be drawn in single drawcall as they need different instance data
-										// but autoinstancer groups all instances of a mesh in single drawcall
-										// so we don't autoinstance moved meshes, only unmoved
-										const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | mesh.sort_key;
-										inserter.push(key, subrenderable);
-									}
-									else if (bucket < 0xff) {
-										instancer.add(mesh.sort_key, subrenderable);
-									} else if (bucket < 0xffFF) {
-										const DVec3 pos = transforms[e.index].pos;
-										const DVec3 rel_pos = pos - camera_pos;
-										const float squared_length = float(rel_pos.x * rel_pos.x + rel_pos.y * rel_pos.y + rel_pos.z * rel_pos.z);
-										const u32 depth_bits = floatFlip(*(u32*)&squared_length);
-										const u64 key = ((u64)bucket << SORT_KEY_BUCKET_SHIFT) | depth_bits;
-										inserter.push(key, subrenderable);
-									}
-								}
-							};
+				const Mesh** sort_key_to_mesh = m_renderer.getSortKeyToMeshMap();
+				for (u32 i = 0, c = (u32)instancer.instances.size(); i < c; ++i) {
+					if (!instancer.instances[i].begin) continue;
 
-							if (mi.lod != lod_idx) {
-								const float d = lod_idx - mi.lod;
-								const float ad = fabsf(d);
-									
-								if (ad <= time_delta) {
-									mi.lod = float(lod_idx);
-									create_key(mi.model->getLODIndices()[lod_idx]);
-								}
-								else {
-									if (!is_shadow) mi.lod += d / ad * time_delta;
-									const u32 cur_lod_idx = u32(mi.lod);
-									create_key(mi.model->getLODIndices()[cur_lod_idx]);
-									if (cur_lod_idx < 3) create_key(mi.model->getLODIndices()[cur_lod_idx + 1]);
-								}
-							}
-							else {
-								const LODMeshIndices& lod = mi.model->getLODIndices()[lod_idx];
-								create_key(lod);
-							}
+					const Mesh* mesh = sort_key_to_mesh[i];
+					const u8 bucket = view.layer_to_bucket[mesh->layer];
+					inserter.push(SORT_KEY_INSTANCED_FLAG | i | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), i | (instancer_idx << SORT_KEY_INSTANCER_SHIFT));
+				}
+
+				PROFILE_BLOCK("fill instance data");
+				u32 num_instances = 0;
+				u32 num_meshes = 0;
+				for (AutoInstancer::Instances& instances : instancer.instances) {
+					const AutoInstancer::Page::Group* group = instances.begin;
+					if (!group) continue;
+
+					++num_meshes;
+					const u32 count = instances.end->offset + instances.end->count;
+					instances.slice = m_renderer.allocTransient(count * (3 * sizeof(Vec4)));
+					u8* instance_data = instances.slice.ptr;
+					const u32 sort_key = u32(&instances - instancer.instances.begin());
+					const Mesh* mesh = sort_key_to_mesh[sort_key];
+
+					const float mesh_lod = mesh->lod;
+
+					while (group) {
+						for (u32 i = 0; i < group->count; ++i) {
+							const EntityRef e = {(i32)group->renderables[i]};
+							const Transform& tr = transforms[e.index];
+							const Vec3 lpos = Vec3(tr.pos - camera_pos);
+							const float lod_d = model_instances[e.index].lod - mesh_lod;
+							memcpy(instance_data, &tr.rot, sizeof(tr.rot));
+							instance_data += sizeof(tr.rot);
+							memcpy(instance_data, &lpos, sizeof(lpos));
+							instance_data += sizeof(lpos);
+							memcpy(instance_data, &lod_d, sizeof(lod_d));
+							instance_data += sizeof(lod_d);
+							memcpy(instance_data, &tr.scale, sizeof(tr.scale));
+							instance_data += sizeof(tr.scale) + sizeof(float) /*padding to vec4*/;
 						}
-						break;
+						group = group->next;
 					}
-					case RenderableTypes::PARTICLES:
-					case RenderableTypes::FUR:
-					case RenderableTypes::COUNT:
-						ASSERT(false);
-						break;
+					num_instances += count;
 				}
-			}
-			profiler::pushInt("count", total);
+				profiler::pushInt("Instances", num_instances);
+				profiler::pushInt("Meshes", num_meshes);
+			};
 
-			const Mesh** sort_key_to_mesh = m_renderer.getSortKeyToMeshMap();
-			for (u32 i = 0, c = (u32)instancer.instances.size(); i < c; ++i) {
-				if (!instancer.instances[i].begin) continue;
-
-				const Mesh* mesh = sort_key_to_mesh[i];
-				const u8 bucket = view.layer_to_bucket[mesh->layer];
-				inserter.push(SORT_KEY_INSTANCED_FLAG | i | ((u64)bucket << SORT_KEY_BUCKET_SHIFT), i | (instancer_idx << SORT_KEY_INSTANCER_SHIFT));
-			}
-
-			PROFILE_BLOCK("fill instance data");
-			u32 num_instances = 0;
-			u32 num_meshes = 0;
-			for (AutoInstancer::Instances& instances : instancer.instances) {
-				const AutoInstancer::Page::Group* group = instances.begin;
-				if (!group) continue;
-
-				++num_meshes;
-				const u32 count = instances.end->offset + instances.end->count;
-				instances.slice = m_renderer.allocTransient(count * (3 * sizeof(Vec4)));
-				u8* instance_data = instances.slice.ptr;
-				const u32 sort_key = u32(&instances - instancer.instances.begin());
-				const Mesh* mesh = sort_key_to_mesh[sort_key];
-
-				const float mesh_lod = mesh->lod;
-
-				while (group) {
-					for (u32 i = 0; i < group->count; ++i) {
-						const EntityRef e = { (i32)group->renderables[i] };
-						const Transform& tr = transforms[e.index];
-						const Vec3 lpos = Vec3(tr.pos - camera_pos);
-						const float lod_d = model_instances[e.index].lod - mesh_lod;
-						memcpy(instance_data, &tr.rot, sizeof(tr.rot));
-						instance_data += sizeof(tr.rot);
-						memcpy(instance_data, &lpos, sizeof(lpos));
-						instance_data += sizeof(lpos);
-						memcpy(instance_data, &lod_d, sizeof(lod_d));
-						instance_data += sizeof(lod_d);
-						memcpy(instance_data, &tr.scale, sizeof(tr.scale));
-						instance_data += sizeof(tr.scale) + sizeof(float) /*padding to vec4*/;
-					}
-					group = group->next;
-				}
-				num_instances += count;
-			}
-			profiler::pushInt("Instances", num_instances);
-			profiler::pushInt("Meshes", num_meshes);
-		});
+		//jobs::runOnWorkers(lambda);
+		jobsystem::runOnWorkers(lambda);
 	}
 
 	struct Histogram {
@@ -3492,7 +3520,8 @@ struct PipelineImpl final : Pipeline {
 
 		u32 m_histogram[SIZE];
 		bool m_sorted;
-		jobs::Mutex m_cs;
+		//jobs::Mutex m_cs;
+		Mutex m_cs;
 
 		void compute(const u64* keys, const u64* values, int size, u16 shift) {
 			memset(m_histogram, 0, sizeof(m_histogram));
@@ -3522,7 +3551,8 @@ struct PipelineImpl final : Pipeline {
 					begin = counter.add(STEP);
 				}
 
-				jobs::MutexGuard lock(m_cs);
+				//jobs::MutexGuard lock(m_cs);
+				MutexGuard lock(m_cs);
 				m_sorted &= sorted;
 				for (u32 i = 0; i < lengthOf(m_histogram); ++i) {
 					m_histogram[i] += histogram[i]; 
@@ -3533,7 +3563,8 @@ struct PipelineImpl final : Pipeline {
 				work();
 			}
 			else {
-				jobs::runOnWorkers(work);
+				//jobs::runOnWorkers(work);
+				jobsystem::runOnWorkers(work);
 			}
 		}
 	};
@@ -3647,7 +3678,8 @@ struct PipelineImpl final : Pipeline {
 	Shader* m_downscale_depth_shader = nullptr;
 	gpu::ProgramHandle m_blit_screen_program = gpu::INVALID_PROGRAM;
 	Array<UniquePtr<View>> m_views;
-	jobs::Signal m_buckets_ready;
+	//jobs::Signal m_buckets_ready;
+	jobsystem::Signal m_buckets_ready;
 	Viewport m_viewport;
 	bool m_is_pixel_jitter_enabled = false;
 	Viewport m_prev_viewport;

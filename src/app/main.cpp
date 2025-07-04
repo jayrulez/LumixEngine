@@ -294,24 +294,37 @@ int main(int args, char* argv[])
 	} data;
 	
 	profiler::setThreadName("Main thread");
-	jobs::run(&data, [](void* ptr) {
-		Data* data = (Data*)ptr;
+	//jobs::run(&data, [](void* ptr) {
+	//	Data* data = (Data*)ptr;
 
-		data->app.onInit();
-		while(!data->app.m_finished) {
-			os::Event e;
-			while(os::getEvent(e)) {
-				data->app.onEvent(e);
-			}
-			data->app.onIdle();
-		}
+	//	data->app.onInit();
+	//	while(!data->app.m_finished) {
+	//		os::Event e;
+	//		while(os::getEvent(e)) {
+	//			data->app.onEvent(e);
+	//		}
+	//		data->app.onIdle();
+	//	}
 
-		data->app.shutdown();
+	//	data->app.shutdown();
 
-		data->semaphore.signal();
-	}, nullptr, 0);
+	//	data->semaphore.signal();
+	//}, nullptr, 0);
 	
-	PROFILE_BLOCK("sleeping");
+		data.app.onInit();
+	while (!data.app.m_finished) {
+		os::Event e;
+		while (os::getEvent(e)) {
+			data.app.onEvent(e);
+		}
+		data.app.onIdle();
+	}
+
+	data.app.shutdown();
+
+	data.semaphore.signal();
+
+	//PROFILE_BLOCK("sleeping");
 	data.semaphore.wait();
 
 	return 0;

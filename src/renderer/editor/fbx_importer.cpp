@@ -9,6 +9,7 @@
 #include "engine/file_system.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/os.h"
@@ -336,7 +337,7 @@ struct FBXImporter : ModelImporter {
 	// convert from ofbx to runtime vertex data, compute missing info (normals, tangents, ao, ...)
 	void postprocess(const ModelMeta& meta, const Path& path) {
 		AtomicI32 geom_idx_getter = 0;
-		jobs::runOnWorkers([&](){
+		jobsystem::runOnWorkers([&](){
 			Array<Skin> skinning(m_allocator);
 			OutputMemoryStream unindexed_triangles(m_allocator);
 			Array<i32> tri_indices_tmp(m_allocator);
@@ -1340,7 +1341,7 @@ struct FBXImporter : ModelImporter {
 	}
 
 	static void ofbx_job_processor(ofbx::JobFunction fn, void*, void* data, u32 size, u32 count) {
-		jobs::forEach(count, 1, [data, size, fn](i32 i, i32){
+		jobsystem::forEach(count, 1, [data, size, fn](i32 i, i32){
 			PROFILE_BLOCK("ofbx job");
 			u8* ptr = (u8*)data;
 			fn(ptr + i * size);

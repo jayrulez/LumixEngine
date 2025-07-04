@@ -1,5 +1,6 @@
 #include "animation/animation.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/os.h"
 #include "core/profiler.h"
@@ -317,7 +318,7 @@ void ModelImporter::postprocessCommon(const ModelMeta& meta, StringView src_file
 		}
 	}
 	
-	jobs::forEach(m_meshes.size(), 1, [&](i32 mesh_idx, i32){
+	jobsystem::forEach(m_meshes.size(), 1, [&](i32 mesh_idx, i32){
 		// TODO this can process the same geom multiple times
 
 		ImportMesh& mesh = m_meshes[mesh_idx];
@@ -593,9 +594,9 @@ bool ModelImporter::write(const Path& src, const ModelMeta& meta) {
 	if (!writeAnimations(filepath, meta)) return false;
 	if (!writePhysics(filepath, meta)) return false;
 	if (meta.split || meta.create_prefab_with_physics) {
-		jobs::moveJobToWorker(0);
+		//jobs::moveJobToWorker(0);
 		bool res = writePrefab(filepath, meta);
-		jobs::yield();
+		//jobs::yield();
 		if (!res) return false;
 	}
 	return true;

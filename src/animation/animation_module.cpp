@@ -4,6 +4,7 @@
 #include "core/atomic.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/profiler.h"
 #include "core/stream.h"
@@ -748,7 +749,11 @@ struct AnimationModuleImpl final : AnimationModule {
 		PROFILE_FUNCTION();
 		if (m_animables.size() == 0) return;
 
-		jobs::forEach(m_animables.size(), 1, [&](i32 idx, i32){
+		/*jobs::forEach(m_animables.size(), 1, [&](i32 idx, i32){
+			Animable& animable = m_animables.at(idx);
+			updateAnimable(animable, time_delta);
+		});*/
+		jobsystem::forEach(m_animables.size(), 1, [&](i32 idx, i32) {
 			Animable& animable = m_animables.at(idx);
 			updateAnimable(animable, time_delta);
 		});
@@ -759,9 +764,10 @@ struct AnimationModuleImpl final : AnimationModule {
 		PROFILE_FUNCTION();
 		if (!m_is_game_running) return;
 		
-		jobs::forEach(m_animators.size(), 1, [&](i32 idx, i32){
+		/*jobs::forEach(m_animators.size(), 1, [&](i32 idx, i32){
 			updateAnimator(m_animators[idx], time_delta);
-		});
+		});*/
+		jobsystem::forEach(m_animators.size(), 1, [&](i32 idx, i32) { updateAnimator(m_animators[idx], time_delta); });
 	}
 
 	void update(float time_delta) override {

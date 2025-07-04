@@ -2,6 +2,7 @@
 #include "core/atomic.h"
 #include "core/crt.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/os.h"
 #include "core/profiler.h"
@@ -1358,7 +1359,8 @@ struct NavigationModuleImpl final : NavigationModule
 
 	struct NavmeshBuildJobImpl : NavmeshBuildJob {
 		~NavmeshBuildJobImpl() {
-			jobs::wait(&signal);
+			//jobs::wait(&signal);
+			jobsystem::wait(&signal);
 		}
 
 		bool isFinished() override {
@@ -1370,7 +1372,7 @@ struct NavigationModuleImpl final : NavigationModule
 		}
 
 		void pushJob() {
-			jobs::runLambda([this](){
+			/*jobs::runLambda([this](){
 				const i32 i = counter.inc();
 				if (i >= total) {
 					return;
@@ -1384,12 +1386,32 @@ struct NavigationModuleImpl final : NavigationModule
 				}
 
 				pushJob();
-			}, &signal);
+			}, &signal);*/
+
+			jobsystem::runLambda(
+				[this]() {
+					const i32 i = counter.inc();
+					if (i >= total) {
+						return;
+					}
+
+					if (!module->generateTile(*zone, zone_entity, i % zone->m_num_tiles_x, i / zone->m_num_tiles_x, false, mutex)) {
+						fail_counter.inc();
+					} else {
+						done_counter.inc();
+					}
+
+					pushJob();
+				},
+				&signal);
 		}
 
 		void run() {
 			total = zone->m_num_tiles_x * zone->m_num_tiles_z;
-			for (u8 i = 0; i < jobs::getWorkersCount() - 1; ++i) {
+			//for (u8 i = 0; i < jobs::getWorkersCount() - 1; ++i) {
+			//	pushJob();
+			//}
+			for (u8 i = 0; i < jobsystem::getWorkersCount() - 1; ++i) {
 				pushJob();
 			}
 		}
@@ -1403,7 +1425,8 @@ struct NavigationModuleImpl final : NavigationModule
 		EntityRef zone_entity;
 		NavigationModuleImpl* module;
 
-		jobs::Counter signal;
+		//jobs::Counter signal;
+		jobsystem::Counter signal;
 	};
 
 	NavmeshBuildJob* generateNavmesh(EntityRef zone_entity) override {
