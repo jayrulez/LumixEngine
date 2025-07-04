@@ -12,6 +12,7 @@
 #include "core/geometry.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/os.h"
 #include "core/path.h"
@@ -579,6 +580,9 @@ struct StudioAppImpl final : StudioApp {
 		if (!jobs::init(cpus_count, m_allocator)) {
 			logError("Failed to initialize job system.");
 		}
+		if (!jobsystem::init(cpus_count, m_allocator)) {
+			logError("Failed to initialize job system.");
+		}
 
 		memset(m_imgui_key_map, 0, sizeof(m_imgui_key_map));
 		m_imgui_key_map[(int)os::Keycode::CTRL] = ImGuiMod_Ctrl;
@@ -662,6 +666,7 @@ struct StudioAppImpl final : StudioApp {
 	}
 
 	~StudioAppImpl() {
+		jobsystem::shutdown();
 		jobs::shutdown();
 	}
 

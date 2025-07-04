@@ -4,6 +4,7 @@
 
 #include "core/allocator.h"
 #include "core/span.h"
+#include "core/jobs.h"
 
 namespace Lumix {
 
