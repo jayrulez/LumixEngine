@@ -8,6 +8,7 @@
 #include "core/hash.h"
 #include "core/log.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/page_allocator.h"
 #include "core/sync.h"
 #include "core/thread.h"
@@ -92,7 +93,8 @@ struct TransientBuffer {
 			return slice;
 		}
 
-		jobs::MutexGuard lock(m_mutex);
+		//jobs::MutexGuard lock(m_mutex);
+		MutexGuard lock(m_mutex);
 		if (!m_overflow.buffer) {
 			m_overflow.buffer = gpu::allocBufferHandle();
 			m_overflow.data = (u8*)os::memReserve(OVERFLOW_BUFFER_SIZE);
@@ -143,7 +145,8 @@ struct TransientBuffer {
 	AtomicI32 m_offset = 0;
 	u32 m_size = 0;
 	u8* m_ptr = nullptr;
-	jobs::Mutex m_mutex;
+	//jobs::Mutex m_mutex;
+	Mutex m_mutex;
 
 	struct {
 		gpu::BufferHandle buffer = gpu::INVALID_BUFFER;
@@ -170,11 +173,14 @@ struct FrameData {
 	u32 gpu_frame = 0xffFFffFF;
 
 	ArenaAllocator arena_allocator;
-	jobs::Mutex shader_mutex;
+	//jobs::Mutex shader_mutex;
+	Mutex shader_mutex;
 	Array<ShaderToCompile> to_compile_shaders;
 	RendererImpl& renderer;
-	jobs::Signal can_setup;
-	jobs::Counter setup_done;
+	//jobs::Signal can_setup;
+	jobsystem::Signal can_setup;
+	//jobs::Counter setup_done;
+	jobsystem::Counter setup_done;
 	u32 frame_number = 0;
 	DrawStream begin_frame_draw_stream;
 	DrawStream draw_stream;
@@ -313,7 +319,8 @@ struct GPUProfiler
 
 	void beginQuery(const char* name, i64 profiler_link, bool stats)
 	{
-		jobs::MutexGuard lock(m_mutex);
+		//jobs::MutexGuard lock(m_mutex);
+		MutexGuard lock(m_mutex);
 		Query& q = m_queries.emplace();
 		q.profiler_link = profiler_link;
 		q.name = name;
@@ -335,7 +342,8 @@ struct GPUProfiler
 
 	void endQuery()
 	{
-		jobs::MutexGuard lock(m_mutex);
+		//jobs::MutexGuard lock(m_mutex);
+		MutexGuard lock(m_mutex);
 		Query& q = m_queries.emplace();
 		q.is_end = true;
 		q.is_frame = false;
@@ -355,7 +363,8 @@ struct GPUProfiler
 	void frame()
 	{
 		PROFILE_FUNCTION();
-		jobs::MutexGuard lock(m_mutex);
+		//jobs::MutexGuard lock(m_mutex);
+		MutexGuard lock(m_mutex);
 		while (!m_queries.empty()) {
 			Query q = m_queries[0];
 			
@@ -384,7 +393,8 @@ struct GPUProfiler
 	Array<Query> m_queries;
 	Array<gpu::QueryHandle> m_pool;
 	Array<gpu::QueryHandle> m_stats_pool;
-	jobs::Mutex m_mutex;
+	//jobs::Mutex m_mutex;
+	Mutex m_mutex;
 	i64 m_gpu_to_cpu_offset;
 	u32 m_stats_counter = 0;
 	gpu::QueryHandle m_stats_query = gpu::INVALID_QUERY;
@@ -476,8 +486,9 @@ struct RendererImpl final : Renderer {
 		m_frame_thread.semaphore.signal();
 		m_frame_thread.destroy();
 
-		jobs::Counter counter;
-		jobs::runLambda([this]() {
+		//jobs::Counter counter;
+		jobsystem::Counter counter;
+		/*jobs::runLambda([this]() {
 			for (const Local<FrameData>& frame : m_frames) {
 				gpu::destroy(frame->transient_buffer.m_buffer);
 				gpu::destroy(frame->uniform_buffer.m_buffer);
@@ -488,13 +499,31 @@ struct RendererImpl final : Renderer {
 			gpu::present();
 			gpu::present();
 			gpu::present();
-		}, &counter, 1);
-		jobs::wait(&counter);
+		}, &counter, 1);*/
+		jobsystem::runLambda(
+			[this]() {
+				for (const Local<FrameData>& frame : m_frames) {
+					gpu::destroy(frame->transient_buffer.m_buffer);
+					gpu::destroy(frame->uniform_buffer.m_buffer);
+				}
+				gpu::destroy(m_material_buffer.buffer);
+				gpu::destroy(m_instanced_meshes_buffer);
+				m_profiler.clear();
+				gpu::present();
+				gpu::present();
+				gpu::present();
+			},
+			&counter,
+			1);
+		//jobs::wait(&counter);
+		jobsystem::wait(&counter);
 		// TODO can't we merge these two jobs?
-		jobs::runLambda([]() {
+		/*jobs::runLambda([]() {
 			gpu::shutdown();
-		}, &counter, 1);
-		jobs::wait(&counter);
+		}, &counter, 1);*/
+		jobsystem::runLambda([]() { gpu::shutdown(); }, &counter, 1);
+		//jobs::wait(&counter);
+		jobsystem::wait(&counter);
 	}
 
 	static void add(String& res, const char* a, u32 b) {
@@ -581,33 +610,44 @@ struct RendererImpl final : Renderer {
 		}
 
 		m_instanced_meshes_buffer = gpu::allocBufferHandle();
-		jobs::Signal signal;
-		jobs::runLambda([this, flags]() {
-			PROFILE_BLOCK("init_render");
-			os::WindowHandle window_handle = m_engine.getMainWindow();
-			if (window_handle == os::INVALID_WINDOW) {
-				logError("Trying to initialize renderer without any window");
-				os::messageBox("Failed to initialize renderer. More info in log.");
-			}
-			if (!gpu::init(window_handle, flags)) {
-				os::messageBox("Failed to initialize renderer. More info in log.");
-			}
+		//jobs::Signal signal;
+		jobsystem::Signal signal;
+		//jobs::runLambda(init_renderer, &m_init_signal, 1);
+		jobsystem::runLambda(
+			[this, flags]() {
+				PROFILE_BLOCK("init_render");
+				os::WindowHandle window_handle = m_engine.getMainWindow();
+				if (window_handle == os::INVALID_WINDOW) {
+					logError("Trying to initialize renderer without any window");
+					os::messageBox("Failed to initialize renderer. More info in log.");
+				}
+				if (!gpu::init(window_handle, flags)) {
+					os::messageBox("Failed to initialize renderer. More info in log.");
+				}
 
-			gpu::MemoryStats mem_stats;
-			if (gpu::getMemoryStats(mem_stats)) {
-				logInfo("Initial GPU memory stats:\n",
-					"total: ", (mem_stats.total_available_mem / (1024.f * 1024.f)), "MB\n"
-					"currect: ", (mem_stats.current_available_mem / (1024.f * 1024.f)), "MB\n"
-					"dedicated: ", (mem_stats.dedicated_vidmem/ (1024.f * 1024.f)), "MB\n");
-			}
+				gpu::MemoryStats mem_stats;
+				if (gpu::getMemoryStats(mem_stats)) {
+					logInfo("Initial GPU memory stats:\n",
+						"total: ",
+						(mem_stats.total_available_mem / (1024.f * 1024.f)),
+						"MB\n"
+						"currect: ",
+						(mem_stats.current_available_mem / (1024.f * 1024.f)),
+						"MB\n"
+						"dedicated: ",
+						(mem_stats.dedicated_vidmem / (1024.f * 1024.f)),
+						"MB\n");
+				}
 
-			for (const Local<FrameData>& frame : m_frames) {
-				frame->transient_buffer.init();
-				frame->uniform_buffer.init();
-			}
-			gpu::createBuffer(m_instanced_meshes_buffer, gpu::BufferFlags::SHADER_BUFFER, 64 * 1024 * 1024, nullptr, "instanced_meshes");
-			m_profiler.init();
-		}, &m_init_signal, 1);
+				for (const Local<FrameData>& frame : m_frames) {
+					frame->transient_buffer.init();
+					frame->uniform_buffer.init();
+				}
+				gpu::createBuffer(m_instanced_meshes_buffer, gpu::BufferFlags::SHADER_BUFFER, 64 * 1024 * 1024, nullptr, "instanced_meshes");
+				m_profiler.init();
+			},
+			&m_init_signal,
+			1);
 
 		m_cpu_frame = m_frames[0].get();
 		for (u32 i = 1; i < lengthOf(m_frames); ++i) {
@@ -698,12 +738,14 @@ struct RendererImpl final : Renderer {
 
 	TransientSlice allocTransient(u32 size) override
 	{
-		jobs::wait(&m_cpu_frame->can_setup);
+		//jobs::wait(&m_cpu_frame->can_setup);
+		jobsystem::wait(&m_cpu_frame->can_setup);
 		return m_cpu_frame->transient_buffer.alloc(size);
 	}
 
 	TransientSlice allocUniform(const void* data, u32 size) override {
-		jobs::wait(&m_cpu_frame->can_setup);
+		//jobs::wait(&m_cpu_frame->can_setup);
+		jobsystem::wait(&m_cpu_frame->can_setup);
 		const TransientSlice slice = m_cpu_frame->uniform_buffer.alloc(size);
 		memcpy(slice.ptr, data, size);
 		return slice;
@@ -711,7 +753,8 @@ struct RendererImpl final : Renderer {
 
 	TransientSlice allocUniform(u32 size) override
 	{
-		jobs::wait(&m_cpu_frame->can_setup);
+		//jobs::wait(&m_cpu_frame->can_setup);
+		jobsystem::wait(&m_cpu_frame->can_setup);
 		return m_cpu_frame->uniform_buffer.alloc(size);
 	}
 	
@@ -832,7 +875,8 @@ struct RendererImpl final : Renderer {
 			m_material_buffer.data[idx].hash = RuntimeHash(data.begin(), data.length() * sizeof(float));
 			m_material_buffer.map.insert(hash, idx);
 			
-			jobs::wait(&m_cpu_frame->can_setup);
+			//jobs::wait(&m_cpu_frame->can_setup);
+			jobsystem::wait(&m_cpu_frame->can_setup);
 			const u32 size = u32(data.length() * sizeof(float));
 			const TransientSlice slice = m_cpu_frame->uniform_buffer.alloc(size);
 			memcpy(slice.ptr, data.begin(), size);
@@ -945,7 +989,8 @@ struct RendererImpl final : Renderer {
 
 
 	void setupJob(void* user_ptr, void(*task)(void*)) override {
-		jobs::run(user_ptr, task, &m_cpu_frame->setup_done);
+		//jobs::run(user_ptr, task, &m_cpu_frame->setup_done);
+		jobsystem::run(user_ptr, task, &m_cpu_frame->setup_done);
 	}
 
 	void addPlugin(RenderPlugin& plugin) override {
@@ -985,7 +1030,8 @@ struct RendererImpl final : Renderer {
 
 	gpu::ProgramHandle queueShaderCompile(Shader& shader, const ShaderKey& key, gpu::VertexDecl decl) override {
 		ASSERT(shader.isReady());
-		jobs::MutexGuard lock(m_cpu_frame->shader_mutex);
+		//jobs::MutexGuard lock(m_cpu_frame->shader_mutex);
+		MutexGuard lock(m_cpu_frame->shader_mutex);
 		
 		for (const auto& i : m_cpu_frame->to_compile_shaders) {
 			if (i.content_hash == shader.m_content_hash && key == i.key) {
@@ -1001,7 +1047,8 @@ struct RendererImpl final : Renderer {
 
 	u8 getShaderDefineIdx(const char* define) override
 	{
-		jobs::MutexGuard lock(m_shader_defines_mutex);
+		//jobs::MutexGuard lock(m_shader_defines_mutex);
+		MutexGuard lock(m_shader_defines_mutex);
 		for (int i = 0; i < m_shader_defines.size(); ++i)
 		{
 			if (m_shader_defines[i] == define)
@@ -1022,7 +1069,8 @@ struct RendererImpl final : Renderer {
 
 	void render() {
 		PROFILE_BLOCK("render submit");
-		jobs::MutexGuard guard(m_render_mutex);
+		//jobs::MutexGuard guard(m_render_mutex);
+		MutexGuard guard(m_render_mutex);
 
 		FrameData& frame = popGPUQueue();
 		profiler::pushInt("Frame", frame.frame_number);
@@ -1078,7 +1126,8 @@ struct RendererImpl final : Renderer {
 			frame.gpu_frame = 0xFFffFFff;
 			frame.transient_buffer.renderDone();
 			frame.uniform_buffer.renderDone();
-			jobs::turnGreen(&frame.can_setup);
+			//jobs::turnGreen(&frame.can_setup);
+			jobsystem::turnGreen(&frame.can_setup);
 			pushFreeFrame(frame);
 		}
 		else {
@@ -1091,16 +1140,19 @@ struct RendererImpl final : Renderer {
 
 	void waitForCommandSetup() override
 	{
-		jobs::wait(&m_cpu_frame->setup_done);
+		//jobs::wait(&m_cpu_frame->setup_done);
+		jobsystem::wait(&m_cpu_frame->setup_done);
 	}
 
 	void waitCanSetup() override
 	{
-		jobs::wait(&m_cpu_frame->can_setup);
+		//jobs::wait(&m_cpu_frame->can_setup);
+		jobsystem::wait(&m_cpu_frame->can_setup);
 	}
 
 	void waitForRender() override {
-		jobs::wait(&m_last_render);
+		//jobs::wait(&m_last_render);
+		jobsystem::wait(&m_last_render);
 	}
 
 	i32 getFrameIndex(FrameData* frame) const {
@@ -1114,53 +1166,69 @@ struct RendererImpl final : Renderer {
 	u32 frameNumber() const override { return m_cpu_frame->frame_number; }
 
 	void pushFreeFrame(FrameData& frame) {
-		jobs::MutexGuard guard(m_frames_mutex);
+		//jobs::MutexGuard guard(m_frames_mutex);
+		MutexGuard guard(m_frames_mutex);
 		m_free_frames.push(&frame);
-		jobs::turnGreen(&m_has_free_frames);
+		//jobs::turnGreen(&m_has_free_frames);
+		jobsystem::turnGreen(&m_has_free_frames);
 	}
 
 	FrameData* popFreeFrame() {
-		jobs::MutexGuard guard(m_frames_mutex);
+		//jobs::MutexGuard guard(m_frames_mutex);
+		MutexGuard guard(m_frames_mutex);
 		if (m_free_frames.empty()) {
-			jobs::exit(&m_frames_mutex);
-			jobs::wait(&m_has_free_frames);
-			jobs::enter(&m_frames_mutex);
+			//jobs::exit(&m_frames_mutex);
+			jobsystem::exit(&m_frames_mutex);
+			//jobs::wait(&m_has_free_frames);
+			jobsystem::wait(&m_has_free_frames);
+			//jobs::enter(&m_frames_mutex);
+			jobsystem::enter(&m_frames_mutex);
 		}
 		FrameData* frame = m_free_frames.back();
 		m_free_frames.pop();
-		if (m_free_frames.empty()) jobs::turnRed(&m_has_free_frames);
+		//if (m_free_frames.empty()) jobs::turnRed(&m_has_free_frames);
+		if (m_free_frames.empty()) jobsystem::turnRed(&m_has_free_frames);
 		return frame;
 	}
 
 	FrameData& popGPUQueue() {
-		jobs::MutexGuard guard(m_frames_mutex);
+		//jobs::MutexGuard guard(m_frames_mutex);
+		MutexGuard guard(m_frames_mutex);
 		FrameData* f = m_gpu_queue;
 		m_gpu_queue = nullptr;
-		jobs::turnGreen(&m_gpu_queue_empty);
+		//jobs::turnGreen(&m_gpu_queue_empty);
+		jobsystem::turnGreen(&m_gpu_queue_empty);
 		ASSERT(f);
 		return *f;
 	}
 
 	void pushToGPUQueue(FrameData& frame) {
-		jobs::MutexGuard guard(m_frames_mutex);
+		//jobs::MutexGuard guard(m_frames_mutex);
+		MutexGuard guard(m_frames_mutex);
 		if (m_gpu_queue) {
-			jobs::exit(&m_frames_mutex);
-			jobs::wait(&m_gpu_queue_empty);
-			jobs::enter(&m_frames_mutex);
+			//jobs::exit(&m_frames_mutex);
+			jobsystem::exit(&m_frames_mutex);
+			//jobs::wait(&m_gpu_queue_empty);
+			jobsystem::wait(&m_gpu_queue_empty);
+			//jobs::enter(&m_frames_mutex);
+			jobsystem::enter(&m_frames_mutex);
 			ASSERT(!m_gpu_queue);
 		}
 		m_gpu_queue = &frame;
-		jobs::turnRed(&m_gpu_queue_empty);
-		jobs::runLambda([this](){
+		//jobs::turnRed(&m_gpu_queue_empty);
+		jobsystem::turnRed(&m_gpu_queue_empty);
+		/*jobs::runLambda([this](){
 			render();
-		}, &m_last_render, 1);
+		}, &m_last_render, 1);*/
+		jobsystem::runLambda([this]() { render(); }, &m_last_render, 1);
 	}
 
 	void frame() override
 	{
 		PROFILE_FUNCTION();
 		
-		jobs::wait(&m_cpu_frame->setup_done);
+		//jobs::wait(&m_cpu_frame->setup_done);
+		jobsystem::wait(&m_cpu_frame->setup_done);
 		clearBuffers();
 
 		m_cpu_frame->draw_stream.useProgram(gpu::INVALID_PROGRAM);
@@ -1176,7 +1244,8 @@ struct RendererImpl final : Renderer {
 		}
 		m_cpu_frame->to_compile_shaders.clear();
 
-		jobs::turnRed(&m_cpu_frame->can_setup);
+		//jobs::turnRed(&m_cpu_frame->can_setup);
+		jobsystem::turnRed(&m_cpu_frame->can_setup);
 		pushToGPUQueue(*m_cpu_frame);
 
 		m_cpu_frame = popFreeFrame();
@@ -1237,7 +1306,7 @@ struct RendererImpl final : Renderer {
 
 				// running this on render thread might wait till other jobs are done on render thread, causing delay
 				// therefore we try to run on any worker if we can
-				jobs::runLambda([f]() {
+				/*jobs::runLambda([f]() {
 					PROFILE_BLOCK("reuse frame");
 					profiler::pushInt("Frame", f->frame_number);
 					f->gpu_frame = 0xFFffFFff;
@@ -1245,7 +1314,19 @@ struct RendererImpl final : Renderer {
 					f->uniform_buffer.renderDone();
 					jobs::turnGreen(&f->can_setup);
 					f->renderer.pushFreeFrame(*f);
-				}, nullptr, can_run_on_any_worker ? jobs::ANY_WORKER : 1);
+				}, nullptr, can_run_on_any_worker ? jobs::ANY_WORKER : 1);*/
+				jobsystem::runLambda(
+					[f]() {
+						PROFILE_BLOCK("reuse frame");
+						profiler::pushInt("Frame", f->frame_number);
+						f->gpu_frame = 0xFFffFFff;
+						f->transient_buffer.renderDone();
+						f->uniform_buffer.renderDone();
+						jobsystem::turnGreen(&f->can_setup);
+						f->renderer.pushFreeFrame(*f);
+					},
+					nullptr,
+					can_run_on_any_worker ? jobsystem::ANY_WORKER : 1);
 			}
 			return 0;
 		}
@@ -1265,8 +1346,10 @@ struct RendererImpl final : Renderer {
 	Engine& m_engine;
 	TagAllocator m_allocator;
 	Array<StaticString<32>> m_shader_defines;
-	jobs::Mutex m_render_mutex;
-	jobs::Mutex m_shader_defines_mutex;
+	//jobs::Mutex m_render_mutex;
+	Mutex m_render_mutex;
+	//jobs::Mutex m_shader_defines_mutex;
+	Mutex m_shader_defines_mutex;
 	Array<StaticString<32>> m_layers;
 	FontManager* m_font_manager;
 	RenderResourceManager<Model> m_model_manager;
@@ -1279,18 +1362,23 @@ struct RendererImpl final : Renderer {
 	u32 m_max_sort_key = 0;
 	u32 m_frame_number = 0;
 	float m_lod_multiplier = 1;
-	jobs::Counter m_init_signal;
+	//jobs::Counter m_init_signal;
+	jobsystem::Counter m_init_signal;
 	HashMap<RuntimeHash, String> m_semantic_defines;
 
 	Array<RenderPlugin*> m_plugins;
 	Local<FrameData> m_frames[2];
-	jobs::Signal m_gpu_queue_empty;
+	//jobs::Signal m_gpu_queue_empty;
+	jobsystem::Signal m_gpu_queue_empty;
 	FrameData* m_gpu_queue = nullptr;
 	FrameData* m_cpu_frame = nullptr;
 	StackArray<FrameData*, 3> m_free_frames;
-	jobs::Mutex m_frames_mutex;
-	jobs::Signal m_has_free_frames;
-	jobs::Counter m_last_render;
+	//jobs::Mutex m_frames_mutex;
+	Mutex m_frames_mutex;
+	//jobs::Signal m_has_free_frames;
+	jobsystem::Signal m_has_free_frames;
+	//jobs::Counter m_last_render;
+	jobsystem::Counter m_last_render;
 
 	GPUProfiler m_profiler;
 	FrameThread m_frame_thread;

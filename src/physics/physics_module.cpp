@@ -36,6 +36,7 @@
 #include "core/color.h"
 #include "core/hash.h"
 #include "core/job_system.h"
+#include "core/jobs.h"
 #include "core/log.h"
 #include "core/math.h"
 #include "core/path.h"
@@ -257,7 +258,15 @@ struct PhysicsModuleImpl final : PhysicsModule
 	{
 		void submitTask(PxBaseTask& task) override
 		{
-			jobs::runLambda([&task]() {
+			/*jobs::runLambda([&task]() {
+					PROFILE_BLOCK(task.getName());
+					profiler::blockColor(Color(0x50, 0xff, 0x50, 0xff).abgr());
+					task.run();
+					task.release();
+				},
+				nullptr);*/
+			jobsystem::runLambda(
+				[&task]() {
 					PROFILE_BLOCK(task.getName());
 					profiler::blockColor(Color(0x50, 0xff, 0x50, 0xff).abgr());
 					task.run();
@@ -265,7 +274,8 @@ struct PhysicsModuleImpl final : PhysicsModule
 				},
 				nullptr);
 		}
-		PxU32 getWorkerCount() const override { return jobs::getWorkersCount(); }
+		//PxU32 getWorkerCount() const override { return jobs::getWorkersCount(); }
+		PxU32 getWorkerCount() const override { return jobsystem::getWorkersCount(); }
 	};
 
 
