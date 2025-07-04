@@ -403,7 +403,7 @@ void ModelImporter::createImpostorTextures(Model* model, ImpostorTexturesContext
 	const u32 bake_normals_define = 1 << renderer->getShaderDefineIdx("BAKE_NORMALS");
 	Array<u32> depth_tmp(m_allocator);
 
-	renderer->pushJob("create impostor textures", [&](DrawStream& stream) {
+	renderer->executeRenderCommand("create impostor textures", [&](DrawStream& stream) {
 		const AABB& aabb = model->getAABB();
 		Vec3 center = (aabb.max + aabb.min) * 0.5f;
 		center.x = center.z = 0;
