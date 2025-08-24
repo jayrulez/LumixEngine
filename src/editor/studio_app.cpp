@@ -868,28 +868,20 @@ struct StudioAppImpl final : StudioApp {
 
 	void run() override {
 		profiler::setThreadName("Main thread");
-		Semaphore semaphore(0, 1);
-		struct Data {
-			StudioAppImpl* that;
-			Semaphore* semaphore;
-		} data = {this, &semaphore};
-		jobs::runLambda([&data]() {
-			data.that->onInit();
-			if (CommandLineParser::isOn("-profile_start")) {
-				data.that->m_profiler_ui->snapshot();
+		
+		// Run directly on main thread instead of as a job
+		onInit();
+		if (CommandLineParser::isOn("-profile_start")) {
+			m_profiler_ui->snapshot();
+		}
+		while (!m_finished) {
+			os::Event e;
+			while(os::getEvent(e)) {
+				onEvent(e);
 			}
-			while (!data.that->m_finished) {
-				os::Event e;
-				while(os::getEvent(e)) {
-					data.that->onEvent(e);
-				}
-				data.that->onIdle();
-			}
-			data.that->onShutdown();
-			data.semaphore->signal();
-		}, nullptr, 0);
-		PROFILE_BLOCK("sleeping");
-		semaphore.wait();
+			onIdle();
+		}
+		onShutdown();
 	}
 
 	

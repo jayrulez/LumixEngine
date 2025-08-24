@@ -296,32 +296,21 @@ struct Runner final
 
 int main(int args, char* argv[])
 {
-	struct Data {
-		Data() : semaphore(0, 1) {}
-		Runner app;
-		Semaphore semaphore;
-	} data;
+	Runner app;
 	
 	profiler::setThreadName("Main thread");
-	jobs::run(&data, [](void* ptr) {
-		Data* data = (Data*)ptr;
-
-		data->app.onInit();
-		while(!data->app.m_finished) {
-			os::Event e;
-			while(os::getEvent(e)) {
-				data->app.onEvent(e);
-			}
-			data->app.onIdle();
-		}
-
-		data->app.shutdown();
-
-		data->semaphore.signal();
-	}, nullptr, 0);
 	
-	PROFILE_BLOCK("sleeping");
-	data.semaphore.wait();
+	// Run directly on main thread instead of as a job
+	app.onInit();
+	while(!app.m_finished) {
+		os::Event e;
+		while(os::getEvent(e)) {
+			app.onEvent(e);
+		}
+		app.onIdle();
+	}
+
+	app.shutdown();
 
 	return 0;
 }
